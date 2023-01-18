@@ -1,0 +1,77 @@
+{
+	"name": "jolievisualize",
+	"description": "Visualization tool for visualizing and refactoring Jolie architecture",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.72.0"
+	},
+	"publisher": "jolie",
+	"categories": [
+		"Visualization",
+		"Snippets",
+		"Programming Languages",
+		"Education"
+	],
+	"author": {
+		"name": "Emil Ovcina",
+		"email": "emovc18@student.sdu.dk"
+	},
+	"activationEvents": [
+		"onCommand:jolievisualize.open",
+		"onCommand:jolievisualize.choosefile",
+		"onCommand:jolievisualize.test"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "jolievisualize.open",
+				"title": "Visualize",
+				"category": "Jolie"
+			},
+			{
+				"command": "jolievisualize.choosefile",
+				"title": "Choose Visualization File",
+				"category": "Jolie"
+			},
+			{
+				"command": "jolievisualize.test",
+				"title": "TEST JOVIS",
+				"category": "Jolie"
+			}
+		],
+		"snippets": [
+			{
+				"language": "json",
+				"path": "./snippets.json"
+			}
+		]
+	},
+	"extensionDependencies": [
+		"jolie.vscode-jolie"
+	],
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"rs": "rm package-lock.json && rm -rf node_modules/ && npm i"
+	},
+	"devDependencies": {
+		"@types/glob": "^8.0.0",
+		"@types/mocha": "^10.0.1",
+		"@types/node": "16.x",
+		"@types/vscode": "^1.74.0",
+		"@typescript-eslint/eslint-plugin": "^5.45.0",
+		"@typescript-eslint/parser": "^5.45.0",
+		"@vscode/test-electron": "^2.2.0",
+		"eslint": "^8.28.0",
+		"glob": "^8.0.3",
+		"mocha": "^10.1.0",
+		"typescript": "^4.9.3"
+	},
+	"dependencies": {
+		"jolievisualize": "file:../jolievisualize-0.0.1.tgz"
+	}
+}

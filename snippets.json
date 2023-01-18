@@ -1,0 +1,7 @@
+{
+	"Visualization File Setup": {
+		"prefix": ["visfile", "jovis"],
+		"body": "[\n\t[\n\t\t{\"file\":\"${1:client.ol}\", \"instances\":\"${2:1}\"$0}\n\t]\n]",
+		"description": "Skeleton visualization file for the Jolie Visualization tool"
+	}
+}
