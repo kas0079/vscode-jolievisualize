@@ -129,12 +129,11 @@ export function activate(context: vscode.ExtensionContext) {
 							JSON.stringify(newContent)
 						);
 					}
-					console.log("got here");
 
 					const newData = await jv.getData(visFile, false);
 					if (newData === WebPanel.data) return;
 					WebPanel.data = newData;
-					WebPanel.sendData();
+					WebPanel.initData();
 				}
 			);
 			disposeables.push(onSaveListener);
