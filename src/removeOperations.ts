@@ -59,8 +59,7 @@ export const removePort = async (
 	filename: string,
 	portName: string,
 	portType: string,
-	serviceName: string,
-	shouldAutoSave = false
+	serviceName: string
 ) => {
 	const document = await openDocument(filename);
 	if (!document) return false;
@@ -73,8 +72,7 @@ export const removePort = async (
 
 	if (!scopeRange) return false;
 
-	const res = await remove(document, scopeRange);
-	if (res && shouldAutoSave) await document.save();
+	return await remove(document, scopeRange);
 };
 
 const remove = async (document: vscode.TextDocument, range: vscode.Range) => {

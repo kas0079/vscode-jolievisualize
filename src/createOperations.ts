@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as path from "path";
 import { findInDocument, openDocument } from "./utils";
 
 export const createPort = async (req: CreatePortRequest, portToken: string) => {
@@ -20,13 +19,12 @@ export const createPort = async (req: CreatePortRequest, portToken: string) => {
 		Interfaces: ${req.port.interfaces}
 	}\n`;
 
-	await create(
+	const res = await create(
 		document,
 		new vscode.Position(servicePos.line, servicePos.character + 1),
 		code
 	);
-
-	// document.save();
+	if (res) await document.save();
 };
 
 const create = async (
@@ -38,6 +36,7 @@ const create = async (
 	edit.insert(document.uri, position, code);
 
 	const result = await vscode.workspace.applyEdit(edit);
+	return result;
 };
 
 type CreatePortRequest = {

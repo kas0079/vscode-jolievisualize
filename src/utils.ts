@@ -75,15 +75,15 @@ export const findClosingBrace = (
 
 export const splitDocumentText = (
 	document: vscode.TextDocument,
-	pos: vscode.Position
+	offset: vscode.Position
 ) => {
 	const documentText = document
 		.getText()
 		.split("\n")
-		.slice(pos.line)
+		.slice(offset.line)
 		.join("\n");
 
-	return documentText.substring(pos.character).split("\n");
+	return documentText.substring(offset.character).split("\n");
 };
 
 export const openDocument = async (filename: string) => {

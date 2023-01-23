@@ -54,16 +54,17 @@ export default class WebPanel {
 					msg.detail.embedPort
 				);
 			else if (msg.command === "removePorts") {
+				let res = false;
 				msg.detail.ports.forEach(
 					async (req: any) =>
-						await removePort(
+						(res = await removePort(
 							req.filename,
 							req.portName,
 							req.portType,
 							req.serviceName
-						)
+						))
 				);
-				await vscode.workspace.saveAll();
+				if (res) await vscode.workspace.saveAll();
 			} else if (msg.command === "renameService")
 				await renameService(msg);
 			else if (msg.command === "newOutputPort")
@@ -129,9 +130,9 @@ export default class WebPanel {
 		);
 		await vscode.workspace.applyEdit(edit);
 
-		WebPanel.updatedFromUI = true;
+		// WebPanel.updatedFromUI = true;
 		const success = await document.save();
-		WebPanel.updatedFromUI = false;
+		// WebPanel.updatedFromUI = false;
 		if (!success) {
 			vscode.window.showErrorMessage(
 				`Could not overwrite visualization file: ${document.fileName}`

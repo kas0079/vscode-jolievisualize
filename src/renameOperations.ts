@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
-import WebPanel from "./WebPanel";
-import { findInDocument, openDocument } from "./utils";
+import { findInDocument } from "./utils";
+
+// TODO:
+/*
+*	renameToken
+	renameByReplace
+*/
 
 export const renameService = async (msg: any) => {
 	const oldService = msg.detail.oldService;
@@ -11,7 +16,7 @@ export const renameService = async (msg: any) => {
 		newService.file,
 		"ervice"
 	);
-	if (!res) WebPanel.undo();
+	return res;
 };
 
 export const renamePort = async (msg: any) => {
@@ -44,18 +49,17 @@ export const renamePort = async (msg: any) => {
 			);
 			break;
 	}
-	if (!res) WebPanel.undo();
+	return res;
 };
 
+const renameByReplace = async (document: vscode.TextDocument) => {};
+
 const rename = async (
+	document: vscode.TextDocument,
 	token: string,
 	newName: string,
-	filename: string,
 	prefix = ""
 ) => {
-	const document = await openDocument(filename);
-	if (!document) return false;
-
 	const c = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
 		"vscode.executeDocumentRenameProvider",
 		document.uri,
