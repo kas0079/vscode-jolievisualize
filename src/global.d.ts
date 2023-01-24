@@ -33,6 +33,13 @@ declare namespace Rename {
 }
 
 declare namespace Create {
+	type EmbedRequest = {
+		filename: string;
+		serviceName: string;
+		embedName: string;
+		embedPort: string;
+	};
+
 	type PortRequest = {
 		serviceName: string;
 		file: string;

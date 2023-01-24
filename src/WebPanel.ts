@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { renamePort, renameService } from "./operations/rename";
-import { createPort } from "./operations/create";
+import { createEmbed, createPort } from "./operations/create";
 import { removeEmbed, removePort } from "./operations/remove";
 
 export default class WebPanel {
@@ -48,6 +48,7 @@ export default class WebPanel {
 			else if (msg.command === "renamePort") await renamePort(msg.detail);
 			else if (msg.command === "removeEmbed")
 				await removeEmbed(msg.detail);
+			else if (msg.command === "addEmbed") await createEmbed(msg.detail);
 			else if (msg.command === "removePorts") {
 				let res = false;
 				msg.detail.ports.forEach(

@@ -70,7 +70,7 @@ export const removePort = async (req: Remove.PortRequest) => {
 //done
 const remove = async (document: vscode.TextDocument, range: vscode.Range) => {
 	const edit = new vscode.WorkspaceEdit();
-	edit.replace(document.uri, range, "");
+	edit.delete(document.uri, range);
 	const res = await vscode.workspace.applyEdit(edit);
 	return res;
 };

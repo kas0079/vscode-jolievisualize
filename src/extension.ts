@@ -152,6 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showInformationMessage(
 					"Chosen Visualization File:" + visFile[0].path
 				);
+				await vscode.commands.executeCommand("jolievisualize.open");
 			}
 		)
 	);
