@@ -1,9 +1,7 @@
 import * as jv from "jolievisualize";
 import * as vscode from "vscode";
 import WebPanel from "./WebPanel";
-import { removeEmbed } from "./removeOperations";
 import {
-	TLS,
 	getAllTopServiceFiles,
 	getVisFileContent,
 	hasTargetNameChanged,
@@ -159,9 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("jolievisualize.test", async () => {
-			await removeEmbed("/aggregator.ol", "Aggregator", "Fax", "Fax");
-		})
+		vscode.commands.registerCommand("jolievisualize.test", async () => {})
 	);
 }
 

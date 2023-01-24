@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { renamePort, renameService } from "./renameOperations";
-import { createPort } from "./createOperations";
-import { removeEmbed, removePort } from "./removeOperations";
+import { renamePort, renameService } from "./operations/rename";
+import { createPort } from "./operations/create";
+import { removeEmbed, removePort } from "./operations/remove";
 
 export default class WebPanel {
 	static currentPanel: WebPanel | undefined;
@@ -45,32 +45,18 @@ export default class WebPanel {
 			if (msg.command === "getData") WebPanel.initData();
 			else if (msg.command === "visData")
 				await WebPanel.setVisfileContent(msg.detail);
-			else if (msg.command === "renamePort") await renamePort(msg);
+			else if (msg.command === "renamePort") await renamePort(msg.detail);
 			else if (msg.command === "removeEmbed")
-				await removeEmbed(
-					msg.detail.filename,
-					msg.detail.serviceName,
-					msg.detail.embedName,
-					msg.detail.embedPort
-				);
+				await removeEmbed(msg.detail);
 			else if (msg.command === "removePorts") {
 				let res = false;
 				msg.detail.ports.forEach(
-					async (req: any) =>
-						(res = await removePort(
-							req.filename,
-							req.portName,
-							req.portType,
-							req.serviceName
-						))
+					async (req: any) => (res = await removePort(req))
 				);
 				if (res) await vscode.workspace.saveAll();
 			} else if (msg.command === "renameService")
-				await renameService(msg);
-			else if (msg.command === "newOutputPort")
-				await createPort(msg.detail, "outputPort");
-			else if (msg.command === "newInputPort")
-				await createPort(msg.detail, "inputPort");
+				await renameService(msg.detail);
+			else if (msg.command === "newPort") await createPort(msg.detail);
 			WebPanel.updatedFromUI = false;
 		});
 

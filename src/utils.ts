@@ -73,19 +73,6 @@ export const findClosingBrace = (
 	return undefined;
 };
 
-export const splitDocumentText = (
-	document: vscode.TextDocument,
-	offset: vscode.Position
-) => {
-	const documentText = document
-		.getText()
-		.split("\n")
-		.slice(offset.line)
-		.join("\n");
-
-	return documentText.substring(offset.character).split("\n");
-};
-
 export const openDocument = async (filename: string) => {
 	if (vscode.workspace.workspaceFolders === undefined) return undefined;
 
@@ -97,6 +84,28 @@ export const openDocument = async (filename: string) => {
 	);
 
 	return document;
+};
+
+export const findTokenInServiceText = (
+	document: vscode.TextDocument,
+	serviceName: string,
+	searchString: string,
+	prefix: string
+) => {
+	const serviceText = getServiceText(document, serviceName);
+	if (!serviceText) return false;
+
+	const posInService = findInDocumentText(
+		serviceText.text,
+		searchString,
+		prefix
+	);
+	if (!posInService) return false;
+
+	return posInService.translate(
+		serviceText.pos.line,
+		serviceText.pos.character
+	);
 };
 
 export const findInDocumentText = (
@@ -137,4 +146,17 @@ export const findInDocument = (
 				searchString.split(" ")[searchString.split(" ").length - 1]
 			)
 	);
+};
+
+const splitDocumentText = (
+	document: vscode.TextDocument,
+	offset: vscode.Position
+) => {
+	const documentText = document
+		.getText()
+		.split("\n")
+		.slice(offset.line)
+		.join("\n");
+
+	return documentText.substring(offset.character).split("\n");
 };

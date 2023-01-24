@@ -3,9 +3,9 @@ import { findInDocument } from "./utils";
 
 // TODO:
 /*
-*	renameToken
-	renameByReplace
-*/
+ *	renameToken
+ *	renameByReplace
+ */
 
 export const renameService = async (msg: any) => {
 	const oldService = msg.detail.oldService;

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { findInDocument, openDocument } from "./utils";
+import { findInDocument, openDocument } from "../utils";
 
-export const createPort = async (req: CreatePortRequest, portToken: string) => {
+export const createPort = async (req: Create.PortRequest) => {
 	const document = await openDocument(req.file);
 	if (!document) return;
 
@@ -10,14 +10,15 @@ export const createPort = async (req: CreatePortRequest, portToken: string) => {
 		"{",
 		`ervice ${req.serviceName}`
 	);
-
 	if (servicePos === undefined) return;
 
-	const code = `\n\n\t${portToken} ${req.port.name} {
+	const code = `\n\n\t${req.portType} ${req.port.name} {
 		Location: "${req.port.location}"
 		Protocol: ${req.port.protocol}
 		Interfaces: ${req.port.interfaces}
 	}\n`;
+
+	//TODO find position of other ports of same type
 
 	const res = await create(
 		document,
@@ -27,6 +28,7 @@ export const createPort = async (req: CreatePortRequest, portToken: string) => {
 	if (res) await document.save();
 };
 
+//done
 const create = async (
 	document: vscode.TextDocument,
 	position: vscode.Position,
@@ -37,15 +39,4 @@ const create = async (
 
 	const result = await vscode.workspace.applyEdit(edit);
 	return result;
-};
-
-type CreatePortRequest = {
-	serviceName: string;
-	file: string;
-	port: {
-		name: string;
-		location: string;
-		protocol: string;
-		interfaces: string;
-	};
 };

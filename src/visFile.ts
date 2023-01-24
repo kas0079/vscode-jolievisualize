@@ -1,13 +1,6 @@
 import * as vscode from "vscode";
 import { findInDocument, openDocument } from "./utils";
 
-export type TLS = {
-	file: string;
-	target?: string;
-	params?: string;
-	instances: number;
-};
-
 export const getVisFileContent = async (file: vscode.Uri) => {
 	const document = await vscode.workspace.openTextDocument(file);
 	return JSON.parse(document.getText()) as TLS[][];

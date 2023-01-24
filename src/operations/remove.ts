@@ -4,23 +4,19 @@ import {
 	findScopeRangeInServiceScope,
 	getServiceText,
 	openDocument,
-} from "./utils";
+} from "../utils";
 
-export const removeEmbed = async (
-	filename: string,
-	serviceName: string,
-	embedName: string,
-	embedPort: string
-) => {
-	const document = await openDocument(filename);
+//how to make shorter?
+export const removeEmbed = async (req: Remove.EmbedRequest) => {
+	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const serviceText = getServiceText(document, serviceName);
+	const serviceText = getServiceText(document, req.serviceName);
 	if (!serviceText) return false;
 
 	const embedLocation = findInDocumentText(
 		serviceText.text,
-		`embed ${embedName}`
+		`embed ${req.embedName}`
 	);
 	if (!embedLocation) return false;
 
@@ -31,13 +27,13 @@ export const removeEmbed = async (
 
 	let embedEndLocation = findInDocumentText(
 		serviceText.text,
-		`${embedPort}`,
+		`${req.embedPort}`,
 		"in"
 	);
 	if (!embedEndLocation) {
 		embedEndLocation = findInDocumentText(
 			serviceText.text,
-			`${embedPort}`,
+			`${req.embedPort}`,
 			"as"
 		);
 		if (!embedEndLocation) return false;
@@ -45,7 +41,7 @@ export const removeEmbed = async (
 
 	const embedEndLocationInDocument = new vscode.Position(
 		embedEndLocation.line + serviceText.pos.line,
-		embedEndLocation.character + embedPort.length + 1
+		embedEndLocation.character + req.embedPort.length + 1
 	);
 
 	const res = await remove(
@@ -55,19 +51,15 @@ export const removeEmbed = async (
 	if (res) await document.save();
 };
 
-export const removePort = async (
-	filename: string,
-	portName: string,
-	portType: string,
-	serviceName: string
-) => {
-	const document = await openDocument(filename);
+//done
+export const removePort = async (req: Remove.PortRequest) => {
+	const document = await openDocument(req.filename);
 	if (!document) return false;
 
 	const scopeRange = findScopeRangeInServiceScope(
 		document,
-		serviceName,
-		`${portType.substring(1)} ${portName}`
+		req.serviceName,
+		`${req.portType.substring(1)} ${req.portName}`
 	);
 
 	if (!scopeRange) return false;
@@ -75,6 +67,7 @@ export const removePort = async (
 	return await remove(document, scopeRange);
 };
 
+//done
 const remove = async (document: vscode.TextDocument, range: vscode.Range) => {
 	const edit = new vscode.WorkspaceEdit();
 	edit.replace(document.uri, range, "");
