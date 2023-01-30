@@ -1,54 +1,17 @@
 import * as vscode from "vscode";
-import {
-	findInDocumentText,
-	findScopeRangeInServiceScope,
-	getServiceText,
-	openDocument,
-} from "../utils";
+import { getRangeWithPrefixToken, openDocument } from "../utils";
 
-//how to make shorter?
+//Done
 export const removeEmbed = async (req: Remove.EmbedRequest) => {
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const serviceText = getServiceText(document, req.serviceName);
-	if (!serviceText) return false;
-
-	const embedLocation = findInDocumentText(
-		serviceText.text,
-		`embed ${req.embedName}`
-	);
-	if (!embedLocation) return false;
-
-	const embedLocationInDocument = new vscode.Position(
-		embedLocation.line + serviceText.pos.line,
-		embedLocation.character
-	);
-
-	let embedEndLocation = findInDocumentText(
-		serviceText.text,
-		`${req.embedPort}`,
-		"in"
-	);
-	if (!embedEndLocation) {
-		embedEndLocation = findInDocumentText(
-			serviceText.text,
-			`${req.embedPort}`,
-			"as"
-		);
-		if (!embedEndLocation) return false;
-	}
-
-	const embedEndLocationInDocument = new vscode.Position(
-		embedEndLocation.line + serviceText.pos.line,
-		embedEndLocation.character + req.embedPort.length + 1
-	);
-
 	const res = await remove(
 		document,
-		new vscode.Range(embedLocationInDocument, embedEndLocationInDocument)
+		getRangeWithPrefixToken(document, req.range, "embed")
 	);
 	if (res) await document.save();
+	return res;
 };
 
 //done
@@ -56,15 +19,12 @@ export const removePort = async (req: Remove.PortRequest) => {
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const scopeRange = findScopeRangeInServiceScope(
+	const res = await remove(
 		document,
-		req.serviceName,
-		`${req.portType.substring(1)} ${req.portName}`
+		getRangeWithPrefixToken(document, req.range, req.portType)
 	);
-
-	if (!scopeRange) return false;
-
-	return await remove(document, scopeRange);
+	if (res) await document.save();
+	return res;
 };
 
 //done

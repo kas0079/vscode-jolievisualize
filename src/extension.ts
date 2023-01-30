@@ -1,6 +1,7 @@
 import * as jv from "jolievisualize";
 import * as vscode from "vscode";
 import WebPanel from "./WebPanel";
+import { createEmbed, createPort } from "./operations/create";
 import {
 	getAllTopServiceFiles,
 	getVisFileContent,
@@ -84,10 +85,18 @@ export function activate(context: vscode.ExtensionContext) {
 					if (
 						(e.languageId !== "json" && e.languageId !== "jolie") ||
 						e.isDirty ||
-						!visFile ||
-						WebPanel.updatedFromUI
+						!visFile
 					)
 						return;
+
+					if (WebPanel.updatedFromUI) {
+						WebPanel.sendData();
+						const newData = await jv.getData(visFile, false);
+						if (newData === WebPanel.data) return;
+						WebPanel.data = newData;
+						return;
+					}
+
 					if (
 						e.languageId === "json" &&
 						e.fileName === visFile[0].fsPath
@@ -158,7 +167,23 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("jolievisualize.test", async () => {})
+		vscode.commands.registerCommand("jolievisualize.test", async () => {
+			await createPort({
+				file: "/client.ol",
+				portType: "outputPort",
+				isFirst: false,
+				range: {
+					start: { line: 9, char: 15 },
+					end: { line: 14, char: -1 },
+				},
+				port: {
+					name: "TestPort",
+					location: "socket://localhost:4321",
+					protocol: "sodep",
+					interfaces: "FaxInterface",
+				},
+			});
+		})
 	);
 }
 
