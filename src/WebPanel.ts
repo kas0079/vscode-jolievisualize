@@ -11,7 +11,6 @@ export default class WebPanel {
 	static data: string;
 	static visFile: vscode.Uri;
 	static visFileContent: string;
-	static updatedFromUI = false;
 	readonly #panel: vscode.WebviewPanel;
 	readonly #extensionPath: string;
 	#disposables: vscode.Disposable[] = [];
@@ -41,24 +40,22 @@ export default class WebPanel {
 		this.#panel.webview.html = this.#getHTML();
 
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
-			WebPanel.updatedFromUI = true;
-			if (msg.command === "getData") WebPanel.initData();
-			else if (msg.command === "visData")
+			if (msg.command === "getData") {
+				WebPanel.initData();
+			} else if (msg.command === "visData") {
 				await WebPanel.setVisfileContent(msg.detail);
-			else if (msg.command === "renamePort") await renamePort(msg.detail);
+			} else if (msg.command === "renamePort")
+				await renamePort(msg.detail);
 			else if (msg.command === "removeEmbed")
 				await removeEmbed(msg.detail);
 			else if (msg.command === "addEmbed") await createEmbed(msg.detail);
 			else if (msg.command === "removePorts") {
-				let res = false;
 				msg.detail.ports.forEach(
-					async (req: any) => (res = await removePort(req))
+					async (req: any) => await removePort(req)
 				);
-				if (res) await vscode.workspace.saveAll();
 			} else if (msg.command === "renameService")
 				await renameService(msg.detail);
 			else if (msg.command === "newPort") await createPort(msg.detail);
-			WebPanel.updatedFromUI = false;
 		});
 
 		this.#panel.onDidDispose(
@@ -116,10 +113,8 @@ export default class WebPanel {
 			contentString
 		);
 
-		WebPanel.updatedFromUI = true;
 		await vscode.workspace.applyEdit(edit);
 		const success = await document.save();
-		WebPanel.updatedFromUI = false;
 
 		if (!success) {
 			vscode.window.showErrorMessage(

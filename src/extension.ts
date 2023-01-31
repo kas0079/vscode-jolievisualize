@@ -85,14 +85,14 @@ export function activate(context: vscode.ExtensionContext) {
 					if (
 						(e.languageId !== "json" && e.languageId !== "jolie") ||
 						e.isDirty ||
-						!visFile
+						!visFile ||
+						!WebPanel.currentPanel
 					)
 						return;
 
 					if (
 						e.languageId === "json" &&
-						e.fileName === visFile[0].fsPath &&
-						!WebPanel.updatedFromUI
+						e.fileName === visFile[0].fsPath
 					) {
 						const newData = await jv.getData(visFile, false);
 						if (newData === WebPanel.data) return;
@@ -129,9 +129,6 @@ export function activate(context: vscode.ExtensionContext) {
 							JSON.stringify(newContent)
 						);
 					}
-
-					if (WebPanel.updatedFromUI) return;
-
 					const newData = await jv.getData(visFile, false);
 					if (newData === WebPanel.data) return;
 					WebPanel.data = newData;
