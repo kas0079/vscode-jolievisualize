@@ -115,11 +115,12 @@ export default class WebPanel {
 			),
 			contentString
 		);
-		await vscode.workspace.applyEdit(edit);
 
-		// WebPanel.updatedFromUI = true;
+		WebPanel.updatedFromUI = true;
+		await vscode.workspace.applyEdit(edit);
 		const success = await document.save();
-		// WebPanel.updatedFromUI = false;
+		WebPanel.updatedFromUI = false;
+
 		if (!success) {
 			vscode.window.showErrorMessage(
 				`Could not overwrite visualization file: ${document.fileName}`

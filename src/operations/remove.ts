@@ -10,7 +10,7 @@ export const removeEmbed = async (req: Remove.EmbedRequest) => {
 		document,
 		getRangeWithPrefixToken(document, req.range, "embed")
 	);
-	if (res) await document.save();
+	if (res) document.save();
 	return res;
 };
 
@@ -23,7 +23,7 @@ export const removePort = async (req: Remove.PortRequest) => {
 		document,
 		getRangeWithPrefixToken(document, req.range, req.portType)
 	);
-	if (res) await document.save();
+	if (res) document.save();
 	return res;
 };
 

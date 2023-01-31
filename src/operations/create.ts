@@ -13,7 +13,7 @@ export const createEmbed = async (req: Create.EmbedRequest) => {
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const code = `\n\tembed ${req.embedName} in ${req.embedPort}\n`;
+	const code = `\n\n\tembed ${req.embedName} in ${req.embedPort}\n`;
 
 	const res = await create(
 		document,

@@ -11,6 +11,7 @@ export const renameService = async (req: Rename.ServiceRequest) => {
 		convertToVsCodeRange(document.getText(), req.range).start,
 		req.newServiceName
 	);
+	if (res) document.save();
 	return res;
 };
 
@@ -19,17 +20,20 @@ export const renamePort = async (req: Rename.PortRequest) => {
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	return req.editType === "port_name"
-		? await renameToken(
-				document,
-				convertToVsCodeRange(document.getText(), req.range).start,
-				req.newLine
-		  )
-		: await replaceLine(
-				document,
-				convertToVsCodeRange(document.getText(), req.range),
-				req.newLine
-		  );
+	const res =
+		req.editType === "port_name"
+			? await renameToken(
+					document,
+					convertToVsCodeRange(document.getText(), req.range).start,
+					req.newLine
+			  )
+			: await replaceLine(
+					document,
+					convertToVsCodeRange(document.getText(), req.range),
+					req.newLine
+			  );
+	if (res) document.save();
+	return res;
 };
 
 // done
@@ -40,9 +44,7 @@ const replaceLine = async (
 ) => {
 	const edit = new vscode.WorkspaceEdit();
 	edit.replace(document.uri, range, newText);
-	const res = await vscode.workspace.applyEdit(edit);
-	if (res) document.save();
-	return res;
+	return await vscode.workspace.applyEdit(edit);
 };
 
 // done
