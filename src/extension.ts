@@ -1,16 +1,30 @@
 import * as jv from "jolievisualize";
 import * as vscode from "vscode";
 import WebPanel from "./WebPanel";
-import { createEmbed, createPort } from "./operations/create";
+import { createPort } from "./operations/create";
 import {
 	getAllTopServiceFiles,
 	getVisFileContent,
 	hasTargetNameChanged,
 } from "./visFile";
 
+let interceptSave = false;
+let interceptSave2 = false;
 let visFile: vscode.Uri[] | undefined = undefined;
 const disposeables: vscode.Disposable[] = [];
 const fileVersions: { fileName: string; version: number }[] = [];
+
+export const setIntercept = (bool: boolean) => {
+	interceptSave = bool;
+};
+
+export const setIntercept2 = (bool: boolean) => {
+	interceptSave2 = bool;
+};
+
+export const getIntercept2 = () => {
+	return interceptSave2;
+};
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
@@ -92,7 +106,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 					if (
 						e.languageId === "json" &&
-						e.fileName === visFile[0].fsPath
+						e.fileName === visFile[0].fsPath &&
+						!interceptSave
 					) {
 						const newData = await jv.getData(visFile, false);
 						if (newData === WebPanel.data) return;
@@ -100,6 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
 						WebPanel.initData();
 						return;
 					}
+					if (interceptSave) return;
 
 					const tmp = fileVersions.find(
 						(t) => t.fileName === e.fileName
@@ -129,6 +145,15 @@ export function activate(context: vscode.ExtensionContext) {
 							JSON.stringify(newContent)
 						);
 					}
+
+					if (interceptSave2) {
+						const newData = await jv.getData(visFile, false);
+						WebPanel.sendRange(newData);
+						interceptSave2 = false;
+						interceptSave = true;
+						return;
+					}
+
 					const newData = await jv.getData(visFile, false);
 					if (newData === WebPanel.data) return;
 					WebPanel.data = newData;

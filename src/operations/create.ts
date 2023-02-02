@@ -14,7 +14,6 @@ export const createEmbed = async (req: Create.EmbedRequest) => {
 	if (!document) return false;
 
 	const code = `\n\n\tembed ${req.embedName} in ${req.embedPort}\n`;
-
 	const res = await create(
 		document,
 		convertToVsCodeRange(document.getText(), req.range).end,

@@ -1,8 +1,9 @@
-import * as vscode from "vscode";
 import * as path from "path";
-import { renamePort, renameService } from "./operations/rename";
+import * as vscode from "vscode";
 import { createEmbed, createPort } from "./operations/create";
 import { removeEmbed, removePort } from "./operations/remove";
+import { renamePort, renameService } from "./operations/rename";
+import { getIntercept2, setIntercept, setIntercept2 } from "./extension";
 
 export default class WebPanel {
 	static currentPanel: WebPanel | undefined;
@@ -40,16 +41,20 @@ export default class WebPanel {
 		this.#panel.webview.html = this.#getHTML();
 
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
+			console.log(msg.command);
 			if (msg.command === "getData") {
 				WebPanel.initData();
 			} else if (msg.command === "visData") {
 				await WebPanel.setVisfileContent(msg.detail);
 			} else if (msg.command === "renamePort")
 				await renamePort(msg.detail);
-			else if (msg.command === "removeEmbed")
+			else if (msg.command === "removeEmbed") {
+				setIntercept2(true);
 				await removeEmbed(msg.detail);
-			else if (msg.command === "addEmbed") await createEmbed(msg.detail);
-			else if (msg.command === "removePorts") {
+			} else if (msg.command === "addEmbed") {
+				setIntercept2(true);
+				await createEmbed(msg.detail);
+			} else if (msg.command === "removePorts") {
 				msg.detail.ports.forEach(
 					async (req: any) => await removePort(req)
 				);
@@ -78,6 +83,14 @@ export default class WebPanel {
 		WebPanel.currentPanel.#panel.webview.postMessage({
 			command: "setData",
 			data: WebPanel.data,
+		});
+	}
+
+	static sendRange(data: any) {
+		if (!WebPanel.currentPanel) return;
+		WebPanel.currentPanel.#panel.webview.postMessage({
+			command: "setRanges",
+			data,
 		});
 	}
 
@@ -113,8 +126,11 @@ export default class WebPanel {
 			contentString
 		);
 
+		if (!getIntercept2()) setIntercept(true);
 		await vscode.workspace.applyEdit(edit);
 		const success = await document.save();
+		if (!getIntercept2()) setIntercept(false);
+		setIntercept2(false);
 
 		if (!success) {
 			vscode.window.showErrorMessage(
