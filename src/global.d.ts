@@ -1,3 +1,5 @@
+import { TextDocument, WorkspaceEdit } from "vscode";
+
 declare namespace Remove {
 	type PortRequest = {
 		filename: string;
@@ -32,6 +34,7 @@ declare namespace Create {
 		embedName: string;
 		embedPort: string;
 		range: SimpleRange;
+		isFirst?: boolean;
 	};
 
 	type PortRequest = {
@@ -47,6 +50,12 @@ declare namespace Create {
 		};
 	};
 }
+
+type UIEdit = {
+	edit: WorkspaceEdit;
+	document: TextDocument;
+	offset: number;
+};
 
 type SimpleRange = {
 	start: { line: number; char: number };

@@ -5,27 +5,31 @@ import {
 	getRangeWithSuffixToken,
 	openDocument,
 } from "../utils";
+import { Create, UIEdit } from "../global";
 
 export const createAggregator = async () => {};
 
 //done
-export const createEmbed = async (req: Create.EmbedRequest) => {
+export const createEmbed = async (
+	req: Create.EmbedRequest
+): Promise<false | UIEdit> => {
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const code = `\n\n\tembed ${req.embedName} in ${req.embedPort}\n`;
-	const res = await create(
-		document,
-		convertToVsCodeRange(document.getText(), req.range).end,
-		code
-	);
+	const code = `\n\n\tembed ${req.embedName} in ${req.embedPort}`;
 
-	if (res) document.save();
-	return res;
+	const range = req.isFirst
+		? getRangeWithSuffixToken(document, req.range, "{")
+		: convertToVsCodeRange(document.getText(), req.range);
+
+	const edit = await create(document, range.end, code);
+	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
 //done
-export const createPort = async (req: Create.PortRequest) => {
+export const createPort = async (
+	req: Create.PortRequest
+): Promise<false | UIEdit> => {
 	const document = await openDocument(req.file);
 	if (!document) return false;
 
@@ -37,21 +41,14 @@ export const createPort = async (req: Create.PortRequest) => {
 		Interfaces: ${req.port.interfaces}
 	}${req.isFirst ? "" : "\n\n\t"}`;
 
-	const res = req.isFirst
-		? await create(
-				document,
-				getRangeWithSuffixToken(document, req.range, "{").end,
-				code
-		  )
-		: await create(
-				document,
-				getRangeWithPrefixToken(document, req.range, req.portType)
-					.start,
-				code
-		  );
+	const range = req.isFirst
+		? getRangeWithSuffixToken(document, req.range, "{")
+		: getRangeWithPrefixToken(document, req.range, req.portType);
 
-	if (res) document.save();
-	return res;
+	const edit = req.isFirst
+		? await create(document, range.end, code)
+		: await create(document, range.start, code);
+	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
 //done
@@ -59,9 +56,8 @@ const create = async (
 	document: vscode.TextDocument,
 	position: vscode.Position,
 	code: string
-) => {
+): Promise<vscode.WorkspaceEdit> => {
 	const edit = new vscode.WorkspaceEdit();
 	edit.insert(document.uri, position, code);
-	const result = await vscode.workspace.applyEdit(edit);
-	return result;
+	return edit;
 };

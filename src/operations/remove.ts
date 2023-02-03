@@ -1,36 +1,38 @@
 import * as vscode from "vscode";
 import { getRangeWithPrefixToken, openDocument } from "../utils";
+import { Remove, UIEdit } from "../global";
 
 //Done
-export const removeEmbed = async (req: Remove.EmbedRequest) => {
+export const removeEmbed = async (
+	req: Remove.EmbedRequest
+): Promise<false | UIEdit> => {
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const res = await remove(
-		document,
-		getRangeWithPrefixToken(document, req.range, "embed")
-	);
-	if (res) document.save();
-	return res;
+	const range = getRangeWithPrefixToken(document, req.range, "embed");
+	const edit = await remove(document, range);
+	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
 //done
-export const removePort = async (req: Remove.PortRequest) => {
+export const removePort = async (
+	req: Remove.PortRequest
+): Promise<false | UIEdit> => {
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const res = await remove(
-		document,
-		getRangeWithPrefixToken(document, req.range, req.portType)
-	);
-	if (res) document.save();
-	return res;
+	const range = getRangeWithPrefixToken(document, req.range, req.portType);
+
+	const edit = await remove(document, range);
+	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
 //done
-const remove = async (document: vscode.TextDocument, range: vscode.Range) => {
+const remove = async (
+	document: vscode.TextDocument,
+	range: vscode.Range
+): Promise<vscode.WorkspaceEdit> => {
 	const edit = new vscode.WorkspaceEdit();
 	edit.delete(document.uri, range);
-	const res = await vscode.workspace.applyEdit(edit);
-	return res;
+	return edit;
 };

@@ -7,9 +7,9 @@ import {
 	getVisFileContent,
 	hasTargetNameChanged,
 } from "./visFile";
+import { TLS } from "./global";
 
 let interceptSave = false;
-let interceptSave2 = false;
 let visFile: vscode.Uri[] | undefined = undefined;
 const disposeables: vscode.Disposable[] = [];
 const fileVersions: { fileName: string; version: number }[] = [];
@@ -18,12 +18,8 @@ export const setIntercept = (bool: boolean) => {
 	interceptSave = bool;
 };
 
-export const setIntercept2 = (bool: boolean) => {
-	interceptSave2 = bool;
-};
-
-export const getIntercept2 = () => {
-	return interceptSave2;
+export const getVisFile = () => {
+	return visFile;
 };
 
 export function activate(context: vscode.ExtensionContext) {
@@ -115,7 +111,11 @@ export function activate(context: vscode.ExtensionContext) {
 						WebPanel.initData();
 						return;
 					}
-					if (interceptSave) return;
+					if (interceptSave) {
+						console.log("intercepted");
+
+						return;
+					}
 
 					const tmp = fileVersions.find(
 						(t) => t.fileName === e.fileName
@@ -144,14 +144,6 @@ export function activate(context: vscode.ExtensionContext) {
 						await WebPanel.setVisfileContent(
 							JSON.stringify(newContent)
 						);
-					}
-
-					if (interceptSave2) {
-						const newData = await jv.getData(visFile, false);
-						WebPanel.sendRange(newData);
-						interceptSave2 = false;
-						interceptSave = true;
-						return;
 					}
 
 					const newData = await jv.getData(visFile, false);

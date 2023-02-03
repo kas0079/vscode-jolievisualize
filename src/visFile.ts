@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { findInDocument, openDocument } from "./utils";
+import { TLS } from "./global";
 
 export const getVisFileContent = async (file: vscode.Uri) => {
 	const document = await vscode.workspace.openTextDocument(file);

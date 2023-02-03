@@ -1,9 +1,10 @@
 import * as path from "path";
 import * as vscode from "vscode";
+import { addEdit, applyEditsAndSave } from "./edits";
+import { setIntercept } from "./extension";
 import { createEmbed, createPort } from "./operations/create";
 import { removeEmbed, removePort } from "./operations/remove";
 import { renamePort, renameService } from "./operations/rename";
-import { getIntercept2, setIntercept, setIntercept2 } from "./extension";
 
 export default class WebPanel {
 	static currentPanel: WebPanel | undefined;
@@ -41,26 +42,34 @@ export default class WebPanel {
 		this.#panel.webview.html = this.#getHTML();
 
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
-			console.log(msg.command);
+			console.log("start", msg.command, msg.save);
 			if (msg.command === "getData") {
 				WebPanel.initData();
 			} else if (msg.command === "visData") {
+				setIntercept(true);
 				await WebPanel.setVisfileContent(msg.detail);
-			} else if (msg.command === "renamePort")
-				await renamePort(msg.detail);
-			else if (msg.command === "removeEmbed") {
-				setIntercept2(true);
-				await removeEmbed(msg.detail);
+			} else if (msg.command === "renamePort") {
+				addEdit(await renamePort(msg.detail));
+				// if (msg.save) await applyEditsAndSave();
+			} else if (msg.command === "removeEmbed") {
+				addEdit(await removeEmbed(msg.detail));
+				// if (msg.save) await applyEditsAndSave();
 			} else if (msg.command === "addEmbed") {
-				setIntercept2(true);
-				await createEmbed(msg.detail);
+				addEdit(await createEmbed(msg.detail));
+				// if (msg.save) await applyEditsAndSave();
 			} else if (msg.command === "removePorts") {
-				msg.detail.ports.forEach(
-					async (req: any) => await removePort(req)
-				);
-			} else if (msg.command === "renameService")
-				await renameService(msg.detail);
-			else if (msg.command === "newPort") await createPort(msg.detail);
+				msg.detail.ports.forEach(async (req: any) => {
+					addEdit(await removePort(req));
+					// if (msg.save) await applyEditsAndSave();
+				});
+			} else if (msg.command === "renameService") {
+				addEdit(await renameService(msg.detail));
+				// if (msg.save) await applyEditsAndSave();
+			} else if (msg.command === "newPort") {
+				addEdit(await createPort(msg.detail));
+			}
+			if (msg.save) await applyEditsAndSave();
+			if (msg.fromPopup) setIntercept(false);
 		});
 
 		this.#panel.onDidDispose(
@@ -126,11 +135,9 @@ export default class WebPanel {
 			contentString
 		);
 
-		if (!getIntercept2()) setIntercept(true);
 		await vscode.workspace.applyEdit(edit);
 		const success = await document.save();
-		if (!getIntercept2()) setIntercept(false);
-		setIntercept2(false);
+		setIntercept(false);
 
 		if (!success) {
 			vscode.window.showErrorMessage(

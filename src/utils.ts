@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import { SimpleRange } from "./global";
 
 export const getRangeWithSuffixToken = (
 	document: vscode.TextDocument,
@@ -204,28 +205,28 @@ export const openDocument = async (filename: string) => {
 // 	);
 // };
 
-// export const findInDocument = (
-// 	document: vscode.TextDocument,
-// 	token: string,
-// 	prefix = ""
-// ) => {
-// 	const documentText = document.getText();
+export const findInDocument = (
+	document: vscode.TextDocument,
+	token: string,
+	prefix = ""
+) => {
+	const documentText = document.getText();
 
-// 	const searchString = `${prefix === "" ? prefix : prefix + " "}${token}`;
-// 	const positionOftext = documentText.indexOf(searchString);
-// 	if (positionOftext < 0) return undefined;
-// 	const tempString = documentText.substring(0, positionOftext);
-// 	const lineNumber = tempString.split("\n").length - 1;
+	const searchString = `${prefix === "" ? prefix : prefix + " "}${token}`;
+	const positionOftext = documentText.indexOf(searchString);
+	if (positionOftext < 0) return undefined;
+	const tempString = documentText.substring(0, positionOftext);
+	const lineNumber = tempString.split("\n").length - 1;
 
-// 	return new vscode.Position(
-// 		lineNumber,
-// 		document
-// 			.lineAt(lineNumber)
-// 			.text.indexOf(
-// 				searchString.split(" ")[searchString.split(" ").length - 1]
-// 			)
-// 	);
-// };
+	return new vscode.Position(
+		lineNumber,
+		document
+			.lineAt(lineNumber)
+			.text.indexOf(
+				searchString.split(" ")[searchString.split(" ").length - 1]
+			)
+	);
+};
 
 // const splitDocumentText = (
 // 	document: vscode.TextDocument,
