@@ -18,7 +18,8 @@ export const applyEditsAndSave = async (): Promise<void> => {
 
 	setIntercept(true);
 	for (let i = 0; i < edits.length; i++) await edits[i].document.save();
-	WebPanel.sendRange(await jv.getData(getVisFile(), false));
 
 	while (edits.length > 0) edits.pop();
+
+	WebPanel.sendRange(await jv.getData(getVisFile(), false));
 };

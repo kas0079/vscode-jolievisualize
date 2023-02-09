@@ -1,13 +1,12 @@
 import * as jv from "jolievisualize";
 import * as vscode from "vscode";
 import WebPanel from "./WebPanel";
-import { createPort } from "./operations/create";
+import { TLS } from "./global";
 import {
 	getAllTopServiceFiles,
 	getVisFileContent,
 	hasTargetNameChanged,
 } from "./visFile";
-import { TLS } from "./global";
 
 let interceptSave = false;
 let visFile: vscode.Uri[] | undefined = undefined;
@@ -30,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			if (vscodeJolie === undefined) {
 				vscode.window.showErrorMessage(
-					"The vscode extension for Jolie must be enabled and active"
+					"The vscode extension for Jolie must be enabled"
 				);
 				return;
 			}
@@ -112,8 +111,7 @@ export function activate(context: vscode.ExtensionContext) {
 						return;
 					}
 					if (interceptSave) {
-						console.log("intercepted");
-
+						// console.log("intercepted");
 						return;
 					}
 
@@ -167,32 +165,16 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				if (!visFile) return;
 				WebPanel.close();
-				vscode.window.showInformationMessage(
-					"Chosen Visualization File:" + visFile[0].path
-				);
+				// vscode.window.showInformationMessage(
+				// 	"Chosen Visualization File:" + visFile[0].path
+				// );
 				await vscode.commands.executeCommand("jolievisualize.open");
 			}
 		)
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("jolievisualize.test", async () => {
-			await createPort({
-				file: "/client.ol",
-				portType: "outputPort",
-				isFirst: false,
-				range: {
-					start: { line: 9, char: 15 },
-					end: { line: 14, char: -1 },
-				},
-				port: {
-					name: "TestPort",
-					location: "socket://localhost:4321",
-					protocol: "sodep",
-					interfaces: "FaxInterface",
-				},
-			});
-		})
+		vscode.commands.registerCommand("jolievisualize.test", async () => {})
 	);
 }
 

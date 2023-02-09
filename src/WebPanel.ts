@@ -1,7 +1,8 @@
 import * as path from "path";
 import * as vscode from "vscode";
+import * as jv from "jolievisualize";
 import { addEdit, applyEditsAndSave } from "./edits";
-import { setIntercept } from "./extension";
+import { getVisFile, setIntercept } from "./extension";
 import { createEmbed, createPort } from "./operations/create";
 import { removeEmbed, removePort } from "./operations/remove";
 import { renamePort, renameService } from "./operations/rename";
@@ -48,6 +49,9 @@ export default class WebPanel {
 			} else if (msg.command === "visData") {
 				setIntercept(true);
 				await WebPanel.setVisfileContent(msg.detail);
+			} else if (msg.command === "getRanges") {
+				WebPanel.sendRange(await jv.getData(getVisFile(), false));
+				console.log("sent ranges");
 			} else if (msg.command === "renamePort") {
 				addEdit(await renamePort(msg.detail));
 				// if (msg.save) await applyEditsAndSave();

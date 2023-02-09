@@ -16,11 +16,6 @@
 		"name": "Emil Ovcina",
 		"email": "emovc18@student.sdu.dk"
 	},
-	"activationEvents": [
-		"onCommand:jolievisualize.open",
-		"onCommand:jolievisualize.choosefile",
-		"onCommand:jolievisualize.test"
-	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
