@@ -8,13 +8,12 @@
 	"publisher": "jolie",
 	"categories": [
 		"Visualization",
-		"Snippets",
 		"Programming Languages",
 		"Education"
 	],
 	"author": {
 		"name": "Emil Ovcina",
-		"email": "emovc18@student.sdu.dk"
+		"email": "emilovcina@gmail.com"
 	},
 	"main": "./out/extension.js",
 	"contributes": {
@@ -25,13 +24,13 @@
 				"category": "Jolie"
 			},
 			{
-				"command": "jolievisualize.choosefile",
-				"title": "Choose Visualization File",
+				"command": "jolievisualize.build",
+				"title": "Build Project",
 				"category": "Jolie"
 			},
 			{
-				"command": "jolievisualize.test",
-				"title": "TEST JOVIS",
+				"command": "jolievisualize.choosefile",
+				"title": "Choose Visualization File",
 				"category": "Jolie"
 			}
 		],
@@ -40,7 +39,22 @@
 				"language": "json",
 				"path": "./snippets.json"
 			}
-		]
+		],
+		"configuration": {
+			"title": "JolieVisualize",
+			"properties": {
+				"jolievisualize.buildFolder": {
+					"type": "string",
+					"default": "build",
+					"description": "The folder which the project will build to."
+				},
+				"jolievisualize.buildMethod": {
+					"type": "string",
+					"default": "docker-compose",
+					"description": "The deployment method to build to."
+				}
+			}
+		}
 	},
 	"extensionDependencies": [
 		"jolie.vscode-jolie"

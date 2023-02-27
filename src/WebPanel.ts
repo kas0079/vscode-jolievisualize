@@ -43,35 +43,28 @@ export default class WebPanel {
 		this.#panel.webview.html = this.#getHTML();
 
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
-			console.log("start", msg.command, msg.save);
-			if (msg.command === "getData") {
-				WebPanel.initData();
-			} else if (msg.command === "visData") {
+			console.log("start", msg.command, msg.save, msg.fromPopup);
+			if (msg.command === "getData") WebPanel.initData();
+			else if (msg.command === "visData") {
 				setIntercept(true);
 				await WebPanel.setVisfileContent(msg.detail);
-			} else if (msg.command === "getRanges") {
+			} else if (msg.command === "getRanges")
 				WebPanel.sendRange(await jv.getData(getVisFile(), false));
-				console.log("sent ranges");
-			} else if (msg.command === "renamePort") {
+			else if (msg.command === "renamePort")
 				addEdit(await renamePort(msg.detail));
-				// if (msg.save) await applyEditsAndSave();
-			} else if (msg.command === "removeEmbed") {
+			else if (msg.command === "removeEmbed")
 				addEdit(await removeEmbed(msg.detail));
-				// if (msg.save) await applyEditsAndSave();
-			} else if (msg.command === "addEmbed") {
+			else if (msg.command === "addEmbed")
 				addEdit(await createEmbed(msg.detail));
-				// if (msg.save) await applyEditsAndSave();
-			} else if (msg.command === "removePorts") {
+			else if (msg.command === "removePorts") {
 				msg.detail.ports.forEach(async (req: any) => {
 					addEdit(await removePort(req));
-					// if (msg.save) await applyEditsAndSave();
 				});
-			} else if (msg.command === "renameService") {
+			} else if (msg.command === "renameService")
 				addEdit(await renameService(msg.detail));
-				// if (msg.save) await applyEditsAndSave();
-			} else if (msg.command === "newPort") {
+			else if (msg.command === "newPort")
 				addEdit(await createPort(msg.detail));
-			}
+
 			if (msg.save) await applyEditsAndSave();
 			if (msg.fromPopup) setIntercept(false);
 		});

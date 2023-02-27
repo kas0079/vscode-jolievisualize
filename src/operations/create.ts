@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import {
 	convertToVsCodeRange,
-	getRangeWithPrefixToken,
 	getRangeWithSuffixToken,
 	openDocument,
 } from "../utils";
@@ -41,13 +40,14 @@ export const createPort = async (
 		Interfaces: ${req.port.interfaces}
 	}${req.isFirst ? "" : "\n\n\t"}`;
 
+	//todo change so new ports gets added after existing ports to save annotations
 	const range = req.isFirst
 		? getRangeWithSuffixToken(document, req.range, "{")
-		: getRangeWithPrefixToken(document, req.range, req.portType);
+		: convertToVsCodeRange(document.getText(), req.range);
 
 	const edit = req.isFirst
 		? await create(document, range.end, code)
-		: await create(document, range.start, code);
+		: await create(document, range.end.translate(0, 1), code);
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
 

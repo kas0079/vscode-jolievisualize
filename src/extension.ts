@@ -7,6 +7,7 @@ import {
 	getVisFileContent,
 	hasTargetNameChanged,
 } from "./visFile";
+import { makeDeploymentFolders } from "./deploy";
 
 let interceptSave = false;
 let visFile: vscode.Uri[] | undefined = undefined;
@@ -54,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			// setData of webview
-			WebPanel.data = await jv.getData(visFile, false);
+			WebPanel.data = jv.getData(visFile, false);
 			WebPanel.visFile = visFile[0];
 			WebPanel.visFileContent = JSON.stringify(
 				await getVisFileContent(visFile[0])
@@ -76,7 +77,11 @@ export function activate(context: vscode.ExtensionContext) {
 					) {
 						const vfContent = (await getVisFileContent(visFile[0]))
 							.flat()
-							.find((t) => e.document.fileName.endsWith(t.file));
+							.find(
+								(t) =>
+									t.file &&
+									e.document.fileName.endsWith(t.file)
+							);
 						if (!vfContent) return;
 						tls = {
 							file: vfContent.file,
@@ -104,14 +109,15 @@ export function activate(context: vscode.ExtensionContext) {
 						e.fileName === visFile[0].fsPath &&
 						!interceptSave
 					) {
-						const newData = await jv.getData(visFile, false);
+						const newData = jv.getData(visFile, false);
 						if (newData === WebPanel.data) return;
 						WebPanel.data = newData;
 						WebPanel.initData();
 						return;
 					}
 					if (interceptSave) {
-						// console.log("intercepted");
+						console.log("intercept");
+
 						return;
 					}
 
@@ -128,11 +134,11 @@ export function activate(context: vscode.ExtensionContext) {
 						tmp.version = e.version;
 					}
 
-					if (tls && (await hasTargetNameChanged(tls))) {
+					if (tls && tls.file && (await hasTargetNameChanged(tls))) {
 						const vfContent = await getVisFileContent(visFile[0]);
 						const tlsInFile = vfContent
 							.flat()
-							.find((t) => e.fileName.endsWith(t.file));
+							.find((t) => t.file && e.fileName.endsWith(t.file));
 						if (!tlsInFile) return;
 						tlsInFile.file = tls.file;
 						tlsInFile.target = undefined;
@@ -143,8 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
 							JSON.stringify(newContent)
 						);
 					}
-
-					const newData = await jv.getData(visFile, false);
+					const newData = jv.getData(visFile, false);
 					if (newData === WebPanel.data) return;
 					WebPanel.data = newData;
 					WebPanel.initData();
@@ -158,23 +163,51 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			"jolievisualize.choosefile",
-			async () => {
+			async (shouldOpenWebview = true) => {
 				visFile = await vscode.window.showOpenDialog({
 					canSelectMany: false,
 					canSelectFolders: false,
 				});
-				if (!visFile) return;
+				if (!shouldOpenWebview || !visFile) return;
 				WebPanel.close();
-				// vscode.window.showInformationMessage(
-				// 	"Chosen Visualization File:" + visFile[0].path
-				// );
 				await vscode.commands.executeCommand("jolievisualize.open");
 			}
 		)
 	);
-
 	context.subscriptions.push(
-		vscode.commands.registerCommand("jolievisualize.test", async () => {})
+		vscode.commands.registerCommand("jolievisualize.build", async () => {
+			if (visFile === undefined) {
+				await vscode.commands.executeCommand(
+					"jolievisualize.choosefile",
+					false
+				);
+			}
+			if (visFile === undefined) {
+				vscode.window.showErrorMessage(
+					"No visualization file was chosen."
+				);
+				return;
+			}
+			const buildFolder = vscode.workspace
+				.getConfiguration("jolievisualize")
+				.get("buildFolder") as string;
+
+			const buildMethod = vscode.workspace
+				.getConfiguration("jolievisualize")
+				.get("buildMethod") as string;
+
+			const buildData = jv.getBuildData(
+				visFile,
+				buildMethod === "" ? buildMethod : "docker-compose"
+			);
+
+			makeDeploymentFolders({
+				data: buildData,
+				visFile: visFile[0].fsPath,
+				buildFolder: buildFolder ?? "build",
+				deployMethod: buildMethod ?? "docker-compose",
+			});
+		})
 	);
 }
 

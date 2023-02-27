@@ -1,5 +1,23 @@
 import { TextDocument, WorkspaceEdit } from "vscode";
 
+declare namespace Deployment {
+	type BuildInfo = {
+		deployment: string;
+		folders: Folder[];
+	};
+
+	type Folder = {
+		name: string;
+		target: string;
+		main: string;
+		expose?: number[];
+		args?: string;
+		files: string[];
+		params?: string;
+		volumes?: string[];
+	};
+}
+
 declare namespace Remove {
 	type PortRequest = {
 		filename: string;
@@ -63,8 +81,13 @@ type SimpleRange = {
 };
 
 type TLS = {
-	file: string;
+	file?: string;
+	name?: string;
 	target?: string;
-	params?: string;
-	instances: number;
+	params?: string | object;
+	instances?: number;
+	volumes?: string[];
+	args?: string;
+	image?: string;
+	env?: object;
 };
