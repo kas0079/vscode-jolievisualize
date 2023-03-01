@@ -16,8 +16,6 @@ export const makeDeploymentFolders = (p: {
 
 	fs.mkdirSync(buildRoot, { recursive: true });
 
-	console.log(visFile, buildRoot, deployMethod);
-
 	let build;
 
 	switch (deployMethod) {

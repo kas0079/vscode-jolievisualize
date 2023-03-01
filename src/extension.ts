@@ -8,6 +8,7 @@ import {
 	hasTargetNameChanged,
 } from "./visFile";
 import { makeDeploymentFolders } from "./deploy";
+import { createService } from "./operations/create";
 
 let interceptSave = false;
 let visFile: vscode.Uri[] | undefined = undefined;
@@ -117,7 +118,6 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 					if (interceptSave) {
 						console.log("intercept");
-
 						return;
 					}
 
@@ -174,6 +174,46 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		)
 	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("jolievisualize.test", async () => {
+			const edit = await createService({
+				file: "/solo.ol",
+				name: "Testservice",
+				range: {
+					start: { line: 0, char: 0 },
+					end: { line: 0, char: 0 },
+				},
+				execution: "concurrent",
+				inputPorts: [
+					{
+						location: '"socket://localhost:1343"',
+						name: "TestIP1",
+						protocol: "sodep",
+						annotation: "TEST",
+						interfaces: ["Dummy"],
+					},
+				],
+				outputPorts: [
+					{
+						location: '"socket://localhost:4343"',
+						name: "TestOP1",
+						protocol: "sodep",
+						interfaces: ["Dummy2"],
+					},
+					{
+						location: '"socket://localhost:4343"',
+						name: "TestOP1",
+						protocol: "sodep",
+						interfaces: ["Dummy2"],
+					},
+				],
+			});
+
+			if (edit !== false) vscode.workspace.applyEdit(edit.edit);
+		})
+	);
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand("jolievisualize.build", async () => {
 			if (visFile === undefined) {

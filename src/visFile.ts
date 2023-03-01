@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as path from "path";
 import { findInDocument, openDocument } from "./utils";
 import { TLS } from "./global";
 
@@ -22,7 +21,7 @@ export const getAllTopServiceFiles = async (visFile: vscode.Uri) => {
 	return content
 		.flat()
 		.filter((t) => t.file)
-		.flatMap((t) => p + t.file)
+		.flatMap((t) => p + (t.file?.startsWith("/") ? t.file : "/" + t.file))
 		.filter(async (f) => {
 			await vscode.workspace.openTextDocument(vscode.Uri.parse(f));
 		});

@@ -47,6 +47,27 @@ declare namespace Rename {
 }
 
 declare namespace Create {
+	type ServiceRequest = {
+		file: string;
+		name: string;
+		range: SimpleRange;
+		execution?: string;
+		inputPorts?: {
+			name: string;
+			location: string;
+			protocol: string;
+			interfaces?: string[];
+			aggregates?: { name: string }[];
+			annotation?: string;
+		}[];
+		outputPorts?: {
+			name: string;
+			location: string;
+			protocol: string;
+			interfaces?: string[];
+		}[];
+	};
+
 	type EmbedRequest = {
 		filename: string;
 		embedName: string;
@@ -65,7 +86,41 @@ declare namespace Create {
 			location: string;
 			protocol: string;
 			interfaces: string;
+			annotation?: string;
 		};
+	};
+}
+
+declare namespace Pattern {
+	type AggregatorRequest = {
+		service: {
+			file: string;
+			name: string;
+			execution?: string;
+			inputPorts: {
+				name: string;
+				location: string;
+				protocol: string;
+				interfaces?: string[];
+				aggregates?: { name: string }[];
+				annotation?: string;
+			}[];
+			outputPorts: {
+				name: string;
+				location: string;
+				protocol: string;
+				interfaces?: string[];
+			}[];
+		};
+		newIps: {
+			isFirst: boolean;
+			range: SimpleRange;
+			file: string;
+			interfaces: string;
+			location: string;
+			name: string;
+			protocol: string;
+		}[];
 	};
 }
 

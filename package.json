@@ -29,6 +29,11 @@
 				"category": "Jolie"
 			},
 			{
+				"command": "jolievisualize.test",
+				"title": "Test",
+				"category": "Jolie"
+			},
+			{
 				"command": "jolievisualize.choosefile",
 				"title": "Choose Visualization File",
 				"category": "Jolie"

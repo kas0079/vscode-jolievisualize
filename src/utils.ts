@@ -64,7 +64,11 @@ export const openDocument = async (filename: string) => {
 	const fsPath = getVisFile();
 	if (!fsPath) return undefined;
 
-	const filePath = path.join(`${path.dirname(fsPath[0].fsPath)}${filename}`);
+	const filePath = path.join(
+		`${path.dirname(fsPath[0].fsPath)}${
+			filename.startsWith("/") ? filename : "/" + filename
+		}`
+	);
 	const document = await vscode.workspace.openTextDocument(
 		vscode.Uri.parse(filePath)
 	);

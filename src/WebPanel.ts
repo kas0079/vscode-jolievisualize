@@ -6,6 +6,7 @@ import { getVisFile, setIntercept } from "./extension";
 import { createEmbed, createPort } from "./operations/create";
 import { removeEmbed, removePort } from "./operations/remove";
 import { renamePort, renameService } from "./operations/rename";
+import { createAggregator } from "./patterns/aggregator";
 
 export default class WebPanel {
 	static currentPanel: WebPanel | undefined;
@@ -64,6 +65,10 @@ export default class WebPanel {
 				addEdit(await renameService(msg.detail));
 			else if (msg.command === "newPort")
 				addEdit(await createPort(msg.detail));
+			else if (msg.command === "create.pattern.aggregator") {
+				const edits = await createAggregator(msg.detail);
+				if (edits) edits.forEach((e) => addEdit(e));
+			}
 
 			if (msg.save) await applyEditsAndSave();
 			if (msg.fromPopup) setIntercept(false);
