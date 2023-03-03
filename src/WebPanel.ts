@@ -2,7 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as jv from "jolievisualize";
 import { addEdit, applyEditsAndSave } from "./edits";
-import { getVisFile, setIntercept } from "./extension";
+import { deactivate, getVisFile, setIntercept } from "./extension";
 import { createEmbed, createPort } from "./operations/create";
 import { removeEmbed, removePort } from "./operations/remove";
 import { renamePort, renameService } from "./operations/rename";
@@ -44,7 +44,7 @@ export default class WebPanel {
 		this.#panel.webview.html = this.#getHTML();
 
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
-			console.log("start", msg.command, msg.save, msg.fromPopup);
+			// console.log("start", msg.command, msg.save, msg.fromPopup);
 			if (msg.command === "getData") WebPanel.initData();
 			else if (msg.command === "visData") {
 				setIntercept(true);
@@ -211,6 +211,7 @@ export default class WebPanel {
 			const x = this.#disposables.pop();
 			if (x) x.dispose();
 		}
+		deactivate();
 	}
 }
 

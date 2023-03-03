@@ -52,11 +52,15 @@ declare namespace Create {
 		name: string;
 		range: SimpleRange;
 		execution?: string;
+		embeddings?: {
+			name: string;
+			port: string;
+		}[];
 		inputPorts?: {
 			name: string;
 			location: string;
 			protocol: string;
-			interfaces?: string[];
+			interfaces?: string;
 			aggregates?: { name: string }[];
 			annotation?: string;
 		}[];
@@ -64,7 +68,7 @@ declare namespace Create {
 			name: string;
 			location: string;
 			protocol: string;
-			interfaces?: string[];
+			interfaces?: string;
 		}[];
 	};
 
@@ -101,7 +105,6 @@ declare namespace Pattern {
 				name: string;
 				location: string;
 				protocol: string;
-				interfaces?: string[];
 				aggregates?: { name: string }[];
 				annotation?: string;
 			}[];
@@ -109,9 +112,10 @@ declare namespace Pattern {
 				name: string;
 				location: string;
 				protocol: string;
-				interfaces?: string[];
+				interfaces?: { name: string }[];
 			}[];
 		};
+		embeddings?: { name: string; port: string }[];
 		newIps: {
 			isFirst: boolean;
 			range: SimpleRange;

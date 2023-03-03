@@ -29,13 +29,13 @@
 				"category": "Jolie"
 			},
 			{
-				"command": "jolievisualize.test",
-				"title": "Test",
+				"command": "jolievisualize.choosefile",
+				"title": "Choose Visualization File",
 				"category": "Jolie"
 			},
 			{
-				"command": "jolievisualize.choosefile",
-				"title": "Choose Visualization File",
+				"command": "jolievisualize.init",
+				"title": "Initialize Visualization File",
 				"category": "Jolie"
 			}
 		],
@@ -57,6 +57,11 @@
 					"type": "string",
 					"default": "docker-compose",
 					"description": "The deployment method to build to."
+				},
+				"jolievisualize.visualizationfile": {
+					"type": "string",
+					"default": "/visualize.jolie.json",
+					"description": "The standard visualization file to look for. If it cannot be found, the user selects another one."
 				}
 			}
 		}

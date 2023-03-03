@@ -14,23 +14,24 @@ export const createService = async (
 
 	let ops = "";
 	let ips = "";
+	let embs = "";
 
 	if (req.outputPorts)
 		req.outputPorts.forEach((op) => {
 			ops += `outputPort ${op.name} {
 		Protocol: ${op.protocol}
-		Location: ${op.location}
-		${op.interfaces ? `Interfaces: ${op.interfaces.map((t) => t)}` : ``}
+		Location: "${op.location}"
+		${op.interfaces ? `Interfaces: ${op.interfaces}` : ``}
 	}\n\n\t`;
 		});
 
 	if (req.inputPorts)
 		req.inputPorts.forEach((ip) => {
 			ips += `${
-				ip.annotation ? `///@jolievisualize ${ip.annotation}\n` : ""
+				ip.annotation ? `\t///@jolievisualize ${ip.annotation}\n` : ""
 			}\tinputPort ${ip.name} {
 		Protocol: ${ip.protocol}
-		Location: ${ip.location}
+		Location: "${ip.location}"
 		${ip.interfaces ? `Interfaces: ${ip.interfaces}` : ``}
 		${
 			ip.aggregates && ip.aggregates.length > 0
@@ -40,10 +41,16 @@ export const createService = async (
 	}\n\n\t`;
 		});
 
+	if (req.embeddings)
+		req.embeddings.forEach(
+			(emb) => (embs += `embed ${emb.name} in ${emb.port}\n\t`)
+		);
+
 	const code = `\n\nservice ${req.name} {
 	${req.execution ? `execution{${req.execution}}\n` : ""}
-	${req.outputPorts ? `${ops}` : ""}
-	${req.inputPorts ? `${ips}` : ""}
+	${req.outputPorts ? `${ops}\n` : ""}${req.inputPorts ? `${ips}` : ""}${
+		req.embeddings ? `${embs}\n` : ""
+	}
 }`;
 
 	const range = convertToVsCodeRange(document.getText(), req.range);
@@ -86,7 +93,6 @@ export const createPort = async (
 		Interfaces: ${req.port.interfaces}
 	}${req.isFirst ? "" : "\n\n\t"}`;
 
-	//todo change so new ports gets added after existing ports to save annotations
 	const range = req.isFirst
 		? getRangeWithSuffixToken(document, req.range, "{")
 		: convertToVsCodeRange(document.getText(), req.range);

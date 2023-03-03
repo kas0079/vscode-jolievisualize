@@ -1,5 +1,7 @@
 import * as jv from "jolievisualize";
 import * as vscode from "vscode";
+import * as path from "path";
+import * as fs from "fs";
 import WebPanel from "./WebPanel";
 import { TLS } from "./global";
 import {
@@ -8,10 +10,9 @@ import {
 	hasTargetNameChanged,
 } from "./visFile";
 import { makeDeploymentFolders } from "./deploy";
-import { createService } from "./operations/create";
 
 let interceptSave = false;
-let visFile: vscode.Uri[] | undefined = undefined;
+let visFile: vscode.Uri | undefined = undefined;
 const disposeables: vscode.Disposable[] = [];
 const fileVersions: { fileName: string; version: number }[] = [];
 
@@ -41,6 +42,20 @@ export function activate(context: vscode.ExtensionContext) {
 				await vscodeJolie.activate();
 			}
 
+			const confFile = vscode.workspace
+				.getConfiguration("jolievisualize")
+				.get("visualizationfile") as string;
+
+			if (!vscode.workspace.workspaceFolders) {
+				deactivate();
+				return;
+			}
+			const workspaceRoot = vscode.workspace.workspaceFolders[0];
+			const visFilepath = vscode.Uri.parse(
+				path.join(workspaceRoot.uri.fsPath, confFile)
+			);
+			if (fs.existsSync(visFilepath.fsPath)) visFile = visFilepath;
+
 			// Select visualize file and getJSON
 			if (visFile === undefined) {
 				await vscode.commands.executeCommand(
@@ -52,14 +67,16 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showErrorMessage(
 					"No visualization file was chosen."
 				);
+				deactivate();
 				return;
 			}
 
 			// setData of webview
+			interceptSave = false;
 			WebPanel.data = jv.getData(visFile, false);
-			WebPanel.visFile = visFile[0];
+			WebPanel.visFile = visFile;
 			WebPanel.visFileContent = JSON.stringify(
-				await getVisFileContent(visFile[0])
+				await getVisFileContent(visFile)
 			);
 
 			// open webview
@@ -72,11 +89,11 @@ export function activate(context: vscode.ExtensionContext) {
 					if (!e.document.fileName.endsWith(".ol") || !visFile)
 						return;
 					if (
-						(await getAllTopServiceFiles(visFile[0])).includes(
+						(await getAllTopServiceFiles(visFile)).includes(
 							e.document.fileName
 						)
 					) {
-						const vfContent = (await getVisFileContent(visFile[0]))
+						const vfContent = (await getVisFileContent(visFile))
 							.flat()
 							.find(
 								(t) =>
@@ -107,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 					if (
 						e.languageId === "json" &&
-						e.fileName === visFile[0].fsPath &&
+						e.fileName === visFile.fsPath &&
 						!interceptSave
 					) {
 						const newData = jv.getData(visFile, false);
@@ -117,7 +134,6 @@ export function activate(context: vscode.ExtensionContext) {
 						return;
 					}
 					if (interceptSave) {
-						console.log("intercept");
 						return;
 					}
 
@@ -135,7 +151,7 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 
 					if (tls && tls.file && (await hasTargetNameChanged(tls))) {
-						const vfContent = await getVisFileContent(visFile[0]);
+						const vfContent = await getVisFileContent(visFile);
 						const tlsInFile = vfContent
 							.flat()
 							.find((t) => t.file && e.fileName.endsWith(t.file));
@@ -164,11 +180,13 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand(
 			"jolievisualize.choosefile",
 			async (shouldOpenWebview = true) => {
-				visFile = await vscode.window.showOpenDialog({
+				const res = await vscode.window.showOpenDialog({
 					canSelectMany: false,
 					canSelectFolders: false,
 				});
-				if (!shouldOpenWebview || !visFile) return;
+				if (!res) return;
+				visFile = res[0];
+				if (!shouldOpenWebview) return;
 				WebPanel.close();
 				await vscode.commands.executeCommand("jolievisualize.open");
 			}
@@ -176,41 +194,36 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("jolievisualize.test", async () => {
-			const edit = await createService({
-				file: "/solo.ol",
-				name: "Testservice",
-				range: {
-					start: { line: 0, char: 0 },
-					end: { line: 0, char: 0 },
-				},
-				execution: "concurrent",
-				inputPorts: [
-					{
-						location: '"socket://localhost:1343"',
-						name: "TestIP1",
-						protocol: "sodep",
-						annotation: "TEST",
-						interfaces: ["Dummy"],
-					},
-				],
-				outputPorts: [
-					{
-						location: '"socket://localhost:4343"',
-						name: "TestOP1",
-						protocol: "sodep",
-						interfaces: ["Dummy2"],
-					},
-					{
-						location: '"socket://localhost:4343"',
-						name: "TestOP1",
-						protocol: "sodep",
-						interfaces: ["Dummy2"],
-					},
-				],
-			});
+		vscode.commands.registerCommand("jolievisualize.init", async () => {
+			const confFile = vscode.workspace
+				.getConfiguration("jolievisualize")
+				.get("visualizationfile") as string;
 
-			if (edit !== false) vscode.workspace.applyEdit(edit.edit);
+			if (
+				!vscode.workspace.workspaceFolders ||
+				fs.existsSync(
+					path.join(
+						vscode.workspace.workspaceFolders[0].uri.fsPath,
+						confFile
+					)
+				)
+			) {
+				vscode.window.showErrorMessage(
+					"Couldn't create Jolie visualization file"
+				);
+				deactivate();
+				return;
+			}
+
+			fs.writeFileSync(
+				path.join(
+					vscode.workspace.workspaceFolders[0].uri.fsPath,
+					confFile
+				),
+				`[\n\t[\n\t\t{"file": "file.ol", "target": "ServiceName"}
+	]
+]`
+			);
 		})
 	);
 
@@ -243,7 +256,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			makeDeploymentFolders({
 				data: buildData,
-				visFile: visFile[0].fsPath,
+				visFile: visFile.fsPath,
 				buildFolder: buildFolder ?? "build",
 				deployMethod: buildMethod ?? "docker-compose",
 			});
@@ -252,5 +265,8 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
+	interceptSave = false;
+	visFile = undefined;
+	while (fileVersions.length > 0) fileVersions.pop();
 	disposeables.forEach((d) => d.dispose());
 }

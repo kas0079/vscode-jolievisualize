@@ -65,7 +65,7 @@ export const openDocument = async (filename: string) => {
 	if (!fsPath) return undefined;
 
 	const filePath = path.join(
-		`${path.dirname(fsPath[0].fsPath)}${
+		`${path.dirname(fsPath.fsPath)}${
 			filename.startsWith("/") ? filename : "/" + filename
 		}`
 	);
