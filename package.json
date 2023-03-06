@@ -1,5 +1,5 @@
 {
-	"name": "jolievisualize",
+	"name": "vscode-jolievisualize",
 	"description": "Visualization tool for visualizing and refactoring Jolie architecture",
 	"version": "0.0.1",
 	"engines": {

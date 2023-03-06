@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { convertToVsCodeRange, openDocument } from "../utils";
 import { Rename, UIEdit } from "../global";
 
-//done
 export const renameService = async (
 	req: Rename.ServiceRequest
 ): Promise<false | UIEdit> => {
@@ -31,7 +30,6 @@ export const renamePort = async (
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
-// done
 const replaceLine = async (
 	document: vscode.TextDocument,
 	range: vscode.Range,
@@ -42,7 +40,6 @@ const replaceLine = async (
 	return edit;
 };
 
-// done
 const renameToken = async (
 	document: vscode.TextDocument,
 	pos: vscode.Position,

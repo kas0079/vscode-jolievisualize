@@ -44,25 +44,26 @@ export default class WebPanel {
 		this.#panel.webview.html = this.#getHTML();
 
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
-			if (msg.command === "getData") WebPanel.initData();
-			else if (msg.command === "visData") {
+			console.log("GOT MESSAGE: ", msg);
+			if (msg.command === "get.data") WebPanel.initData();
+			else if (msg.command === "set.data") {
 				setIntercept(true);
 				await WebPanel.setVisfileContent(msg.detail);
-			} else if (msg.command === "getRanges")
+			} else if (msg.command === "get.ranges")
 				WebPanel.sendRange(await jv.getData(getVisFile(), false));
-			else if (msg.command === "renamePort")
+			else if (msg.command === "rename.port")
 				addEdit(await renamePort(msg.detail));
-			else if (msg.command === "removeEmbed")
+			else if (msg.command === "remove.embed")
 				addEdit(await removeEmbed(msg.detail));
-			else if (msg.command === "addEmbed")
+			else if (msg.command === "create.embed")
 				addEdit(await createEmbed(msg.detail));
-			else if (msg.command === "removePorts") {
+			else if (msg.command === "remove.ports") {
 				msg.detail.ports.forEach(async (req: any) => {
 					addEdit(await removePort(req));
 				});
-			} else if (msg.command === "renameService")
+			} else if (msg.command === "rename.service")
 				addEdit(await renameService(msg.detail));
-			else if (msg.command === "newPort")
+			else if (msg.command === "create.port")
 				addEdit(await createPort(msg.detail));
 			else if (msg.command === "create.pattern.aggregator") {
 				const edits = await createAggregator(msg.detail);
@@ -92,7 +93,7 @@ export default class WebPanel {
 	static initData() {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
-			command: "initData",
+			command: "init.data",
 			data: WebPanel.data,
 		});
 	}
@@ -100,7 +101,7 @@ export default class WebPanel {
 	static sendData() {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
-			command: "setData",
+			command: "set.data",
 			data: WebPanel.data,
 		});
 	}
@@ -108,7 +109,7 @@ export default class WebPanel {
 	static sendRange(data: any) {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
-			command: "setRanges",
+			command: "set.ranges",
 			data,
 		});
 	}

@@ -139,6 +139,7 @@ export function activate(context: vscode.ExtensionContext) {
 							return;
 						}
 						if (interceptSave) {
+							console.log("interceptSave");
 							return;
 						}
 
