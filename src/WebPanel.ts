@@ -44,7 +44,6 @@ export default class WebPanel {
 		this.#panel.webview.html = this.#getHTML();
 
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
-			// console.log("start", msg.command, msg.save, msg.fromPopup);
 			if (msg.command === "getData") WebPanel.initData();
 			else if (msg.command === "visData") {
 				setIntercept(true);
@@ -68,6 +67,15 @@ export default class WebPanel {
 			else if (msg.command === "create.pattern.aggregator") {
 				const edits = await createAggregator(msg.detail);
 				if (edits) edits.forEach((e) => addEdit(e));
+			} else if (msg.command === "open.file") {
+				const rootdir = path.dirname(getVisFile()?.fsPath ?? "");
+				const doc = await vscode.workspace.openTextDocument(
+					path.join(rootdir, msg.detail.file)
+				);
+				await vscode.window.showTextDocument(
+					doc,
+					vscode.ViewColumn.One
+				);
 			}
 
 			if (msg.save) await applyEditsAndSave();
