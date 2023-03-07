@@ -5,7 +5,7 @@
 	"engines": {
 		"vscode": "^1.72.0"
 	},
-	"publisher": "jolie",
+	"publisher": "emilovcina",
 	"categories": [
 		"Visualization",
 		"Programming Languages",

@@ -14,7 +14,6 @@ export const renameService = async (
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
-// TODO: test
 export const renamePort = async (
 	req: Rename.PortRequest
 ): Promise<false | UIEdit> => {
