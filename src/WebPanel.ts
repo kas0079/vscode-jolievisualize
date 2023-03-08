@@ -127,8 +127,10 @@ export default class WebPanel {
 		if (
 			vscode.workspace.workspaceFolders === undefined ||
 			WebPanel.visFileContent === contentString
-		)
+		) {
+			setIntercept(false);
 			return;
+		}
 
 		WebPanel.visFileContent = contentString;
 
