@@ -53,7 +53,8 @@ export const makeDeploymentFolders = (p: {
 		folder.volumes?.forEach((vol) => {
 			fs.cpSync(
 				path.join(path.join(path.dirname(visFile)), vol),
-				path.join(buildRoot, "-res", vol)
+				path.join(buildRoot, "-res", vol),
+				{ recursive: true }
 			);
 		});
 
