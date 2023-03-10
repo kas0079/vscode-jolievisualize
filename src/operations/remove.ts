@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
-import { getRangeWithPrefixToken, openDocument } from "../utils";
-import { Remove, UIEdit } from "../global";
+import {
+	convertToVsCodeRange,
+	getRangeWithPrefixToken,
+	isPortRangeAnEmbedding,
+	openDocument,
+} from "../utils";
+import { Remove, SimpleRange, UIEdit } from "../global";
 
 //Done
 export const removeEmbed = async (
@@ -10,6 +15,8 @@ export const removeEmbed = async (
 	if (!document) return false;
 
 	const range = getRangeWithPrefixToken(document, req.range, "embed");
+	if (range === -1) return false;
+
 	const edit = await remove(document, range);
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
@@ -21,8 +28,13 @@ export const removePort = async (
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const range = getRangeWithPrefixToken(document, req.range, req.portType);
+	const range = isPortRangeAnEmbedding(document, req.range)
+		? getRangeWithPrefixToken(document, req.range, "embed")
+		: getRangeWithPrefixToken(document, req.range, req.portType);
 
+	if (range === -1) {
+		return false;
+	}
 	const edit = await remove(document, range);
 	return { edit, document, offset: document.offsetAt(range.start) };
 };

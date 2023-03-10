@@ -1,6 +1,6 @@
+import * as jv from "jolievisualize";
 import * as path from "path";
 import * as vscode from "vscode";
-import * as jv from "jolievisualize";
 import { addEdit, applyEditsAndSave } from "./edits";
 import { deactivate, getVisFile, setIntercept } from "./extension";
 import { createEmbed, createPort } from "./operations/create";
@@ -108,6 +108,7 @@ export default class WebPanel {
 
 	static sendRange(data: any) {
 		if (!WebPanel.currentPanel) return;
+		console.log("SEND RANGES");
 		WebPanel.currentPanel.#panel.webview.postMessage({
 			command: "set.ranges",
 			data,

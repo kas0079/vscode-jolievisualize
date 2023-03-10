@@ -29,6 +29,7 @@ export const getRangeWithPrefixToken = (
 		.getText()
 		.substring(0, document.offsetAt(codeRange.start))
 		.lastIndexOf(prefix);
+	if (prefixOffset < 0) return -1;
 	const startPos = document.positionAt(prefixOffset);
 	return new vscode.Range(startPos, codeRange.end);
 };
@@ -97,4 +98,14 @@ export const findInDocument = (
 				searchString.split(" ")[searchString.split(" ").length - 1]
 			)
 	);
+};
+
+export const isPortRangeAnEmbedding = (
+	document: vscode.TextDocument,
+	range: SimpleRange
+) => {
+	const rangeText = document.getText(
+		convertToVsCodeRange(document.getText(), range)
+	);
+	return !rangeText.includes("{");
 };
