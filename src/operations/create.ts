@@ -90,7 +90,11 @@ export const createPort = async (
 	}\t${req.portType} ${req.port.name} {
 		Location: "${req.port.location}"
 		Protocol: ${req.port.protocol}
-		Interfaces: ${req.port.interfaces}
+		${
+			req.port.interfaces === ""
+				? "OneWay: dummy(void)"
+				: "Interfaces: " + req.port.interfaces
+		}
 	}${req.isFirst ? "" : "\n\n\t"}`;
 
 	const range = req.isFirst
