@@ -104,6 +104,15 @@ export const createPort = async (
 	const edit = req.isFirst
 		? await create(document, range.end, code)
 		: await create(document, range.end.translate(0, 1), code);
+
+	console.log(
+		req.isFirst,
+		document.offsetAt(range.end),
+		document.positionAt(document.offsetAt(range.end)),
+		range,
+		req.range
+	);
+
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
 

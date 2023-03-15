@@ -46,9 +46,13 @@ export default class WebPanel {
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
 			console.log("GOT MESSAGE: ", msg);
 			if (msg.command === "get.data") WebPanel.initData();
-			else if (msg.command === "set.data") {
+			if (msg.command === "reload") {
+				WebPanel.initData();
+				setIntercept(false);
+			} else if (msg.command === "set.data") {
 				setIntercept(true);
 				await WebPanel.setVisfileContent(msg.detail);
+				WebPanel.sendRange(await jv.getData(getVisFile(), false));
 			} else if (msg.command === "get.ranges")
 				WebPanel.sendRange(await jv.getData(getVisFile(), false));
 			else if (msg.command === "rename.port")
@@ -108,7 +112,6 @@ export default class WebPanel {
 
 	static sendRange(data: any) {
 		if (!WebPanel.currentPanel) return;
-		console.log("SEND RANGES");
 		WebPanel.currentPanel.#panel.webview.postMessage({
 			command: "set.ranges",
 			data,
@@ -152,6 +155,8 @@ export default class WebPanel {
 		await vscode.workspace.applyEdit(edit);
 		const success = await document.save();
 		setIntercept(false);
+
+		// WebPanel.sendRange(await jv.getData(getVisFile(), false));
 
 		if (!success) {
 			vscode.window.showErrorMessage(
