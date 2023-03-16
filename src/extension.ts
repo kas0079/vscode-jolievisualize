@@ -69,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 
 				if (visFile === undefined) {
-					vscode.window.showErrorMessage(
+					await vscode.window.showErrorMessage(
 						"No visualization file was chosen."
 					);
 					deactivate();
@@ -224,7 +224,7 @@ export function activate(context: vscode.ExtensionContext) {
 					)
 				)
 			) {
-				vscode.window.showErrorMessage(
+				await vscode.window.showErrorMessage(
 					"Couldn't create Jolie visualization file"
 				);
 				deactivate();
@@ -246,13 +246,30 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("jolievisualize.build", async () => {
 			if (visFile === undefined) {
+				const confFile = vscode.workspace
+					.getConfiguration("jolievisualize")
+					.get("visualizationfile") as string;
+
+				if (!vscode.workspace.workspaceFolders) {
+					deactivate();
+					return;
+				}
+				const workspaceRoot = vscode.workspace.workspaceFolders[0];
+				const visFilepath = vscode.Uri.parse(
+					path.join(workspaceRoot.uri.fsPath, confFile)
+				);
+				if (fs.existsSync(visFilepath.fsPath)) visFile = visFilepath;
+				else visFile = undefined;
+			}
+
+			if (visFile === undefined) {
 				await vscode.commands.executeCommand(
 					"jolievisualize.choosefile",
 					false
 				);
 			}
 			if (visFile === undefined) {
-				vscode.window.showErrorMessage(
+				await vscode.window.showErrorMessage(
 					"No visualization file was chosen."
 				);
 				return;
