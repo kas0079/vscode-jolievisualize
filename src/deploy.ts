@@ -110,3 +110,10 @@ if (process.argv.length < 3) {
 	console.log("Need input arguments.");
 	process.exit(1);
 }
+
+export const formatBuildFolder = (folder: string): string => {
+	let res = "";
+	if (!folder.startsWith("/")) res = "/" + folder;
+	if (folder.endsWith("/")) res.substring(0, res.length - 1);
+	return res;
+};

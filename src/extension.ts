@@ -9,7 +9,7 @@ import {
 	getVisFileContent,
 	hasTargetNameChanged,
 } from "./visFile";
-import { makeDeploymentFolders } from "./deploy";
+import { formatBuildFolder, makeDeploymentFolders } from "./deploy";
 
 let interceptSave = false;
 let visFile: vscode.Uri | undefined = undefined;
@@ -284,13 +284,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 			const buildData = jv.getBuildData(
 				visFile,
-				buildMethod === "" ? buildMethod : "docker-compose"
+				buildMethod === "" ? buildMethod : "docker-compose",
+				formatBuildFolder(buildFolder)
 			);
 
 			makeDeploymentFolders({
 				data: buildData,
 				visFile: visFile.fsPath,
-				buildFolder: buildFolder ?? "build",
+				buildFolder: buildFolder ?? "/build",
 				deployMethod: buildMethod ?? "docker-compose",
 			});
 		})
