@@ -11,37 +11,40 @@ import {
 } from "./visFile";
 import { formatBuildFolder, makeDeploymentFolders } from "./deploy";
 
+const USE_LSP = false;
+
 let interceptSave = false;
 let visFile: vscode.Uri | undefined = undefined;
 const disposeables: vscode.Disposable[] = [];
 const fileVersions: { fileName: string; version: number }[] = [];
 
-export const setIntercept = (bool: boolean) => {
+export const setIntercept = (bool: boolean): void => {
 	interceptSave = bool;
 };
 
-export const getVisFile = () => {
+export const getVisFile = (): vscode.Uri | undefined => {
 	return visFile;
 };
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			"jolievisualize.open",
 			async (defaultVf = true) => {
-				const vscodeJolie =
-					vscode.extensions.getExtension("jolie.vscode-jolie");
+				if (USE_LSP) {
+					const vscodeJolie =
+						vscode.extensions.getExtension("jolie.vscode-jolie");
 
-				if (vscodeJolie === undefined) {
-					vscode.window.showErrorMessage(
-						"The vscode extension for Jolie must be enabled"
-					);
-					return;
-				}
-
-				if (!vscodeJolie.isActive) {
-					// Activate jolie extension
-					await vscodeJolie.activate();
+					if (vscodeJolie === undefined) {
+						vscode.window.showErrorMessage(
+							"The vscode extension for Jolie must be enabled"
+						);
+						return;
+					}
+					if (!vscodeJolie.isActive) {
+						// Activate jolie extension
+						await vscodeJolie.activate();
+					}
 				}
 
 				if (defaultVf) {
@@ -138,10 +141,7 @@ export function activate(context: vscode.ExtensionContext) {
 							WebPanel.initData();
 							return;
 						}
-						if (interceptSave) {
-							console.log("interceptSave");
-							return;
-						}
+						if (interceptSave) return;
 
 						const tmp = fileVersions.find(
 							(t) => t.fileName === e.fileName
@@ -298,7 +298,7 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 }
 
-export function deactivate() {
+export function deactivate(): void {
 	interceptSave = false;
 	visFile = undefined;
 	while (fileVersions.length > 0) fileVersions.pop();

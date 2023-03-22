@@ -1,11 +1,10 @@
 import * as vscode from "vscode";
+import { Remove, UIEdit } from "../global";
 import {
-	convertToVsCodeRange,
 	getRangeWithPrefixToken,
 	isPortRangeAnEmbedding,
 	openDocument,
 } from "../utils";
-import { Remove, SimpleRange, UIEdit } from "../global";
 
 //Done
 export const removeEmbed = async (

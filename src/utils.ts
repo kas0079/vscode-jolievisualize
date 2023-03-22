@@ -7,7 +7,7 @@ export const getRangeWithSuffixToken = (
 	document: vscode.TextDocument,
 	range: SimpleRange,
 	suffix: string
-) => {
+): vscode.Range => {
 	const codeRange = convertToVsCodeRange(document.getText(), range);
 	const suffixOffset = document
 		.getText()
@@ -23,7 +23,7 @@ export const getRangeWithPrefixToken = (
 	document: vscode.TextDocument,
 	range: SimpleRange,
 	prefix: string
-) => {
+): vscode.Range | -1 => {
 	const codeRange = convertToVsCodeRange(document.getText(), range);
 	const prefixOffset = document
 		.getText()
@@ -37,7 +37,7 @@ export const getRangeWithPrefixToken = (
 export const convertToVsCodeRange = (
 	documentText: string,
 	range: SimpleRange
-) => {
+): vscode.Range => {
 	let startLine = range.start.line;
 	let startChar = range.start.char;
 	let endChar = range.end.char;
@@ -59,7 +59,9 @@ export const convertToVsCodeRange = (
 	);
 };
 
-export const openDocument = async (filename: string) => {
+export const openDocument = async (
+	filename: string
+): Promise<vscode.TextDocument | undefined> => {
 	if (vscode.workspace.workspaceFolders === undefined) return undefined;
 
 	const fsPath = getVisFile();
@@ -81,7 +83,7 @@ export const findInDocument = (
 	document: vscode.TextDocument,
 	token: string,
 	prefix = ""
-) => {
+): vscode.Position | undefined => {
 	const documentText = document.getText();
 
 	const searchString = `${prefix === "" ? prefix : prefix + " "}${token}`;
@@ -103,7 +105,7 @@ export const findInDocument = (
 export const isPortRangeAnEmbedding = (
 	document: vscode.TextDocument,
 	range: SimpleRange
-) => {
+): boolean => {
 	const rangeText = document.getText(
 		convertToVsCodeRange(document.getText(), range)
 	);

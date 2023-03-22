@@ -44,7 +44,6 @@ export default class WebPanel {
 		this.#panel.webview.html = this.#getHTML();
 
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
-			console.log("GOT MESSAGE: ", msg);
 			if (msg.command === "get.data") WebPanel.initData();
 			if (msg.command === "reload") {
 				WebPanel.initData();
@@ -94,7 +93,7 @@ export default class WebPanel {
 		);
 	}
 
-	static initData() {
+	static initData(): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
 			command: "init.data",
@@ -102,7 +101,7 @@ export default class WebPanel {
 		});
 	}
 
-	static sendData() {
+	static sendData(): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
 			command: "set.data",
@@ -110,7 +109,7 @@ export default class WebPanel {
 		});
 	}
 
-	static sendRange(data: any) {
+	static sendRange(data: any): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
 			command: "set.ranges",
@@ -118,14 +117,14 @@ export default class WebPanel {
 		});
 	}
 
-	static undo() {
+	static undo(): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
 			command: "undo",
 		});
 	}
 
-	static async setVisfileContent(visfileContent: string) {
+	static async setVisfileContent(visfileContent: string): Promise<void> {
 		const jsonContent = JSON.parse(visfileContent);
 		const contentString = JSON.stringify(jsonContent.content);
 		if (
@@ -156,8 +155,6 @@ export default class WebPanel {
 		const success = await document.save();
 		setIntercept(false);
 
-		// WebPanel.sendRange(await jv.getData(getVisFile(), false));
-
 		if (!success) {
 			vscode.window.showErrorMessage(
 				`Could not overwrite visualization file: ${document.fileName}`
@@ -165,18 +162,18 @@ export default class WebPanel {
 		}
 	}
 
-	static open(extensionPath: string) {
+	static open(extensionPath: string): void {
 		const column = vscode.ViewColumn.Beside;
 		if (WebPanel.currentPanel) WebPanel.currentPanel.#panel.reveal(column);
 		else WebPanel.currentPanel = new WebPanel(extensionPath, column);
 	}
 
-	static close() {
+	static close(): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#dispose();
 	}
 
-	#getHTML() {
+	#getHTML(): string {
 		const scriptPathOnDisk = vscode.Uri.file(
 			path.join(
 				this.#extensionPath,
@@ -220,7 +217,7 @@ export default class WebPanel {
 			</html>`;
 	}
 
-	#dispose() {
+	#dispose(): void {
 		WebPanel.currentPanel = undefined;
 		this.#panel.dispose();
 
@@ -232,7 +229,7 @@ export default class WebPanel {
 	}
 }
 
-function getNonce() {
+function getNonce(): string {
 	let text = "";
 	const possible =
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
