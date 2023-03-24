@@ -16,7 +16,8 @@ Run the command `Jolie: Initialize Visualization File` and a standard skeleton J
 
 ### Visualize
 
-When a valid visualization file has been created, run the command: `Jolie: Visualize` to bring up the UI.
+When a valid visualization file has been created, run the command: `Jolie: Visualize` to bring up the UI:
+![Jolievisualize vscode example](https://i.imgur.com/KlO4bKw.png)
 
 ### Refactor
 
