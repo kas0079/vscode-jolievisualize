@@ -2,6 +2,11 @@ import { Pattern, SimpleRange, UIEdit } from "../global";
 import { createPort, createService } from "../operations/create";
 import { openDocument } from "../utils";
 
+/**
+ * Handles a create aggregator request from the UI.
+ * Creates all necessary ports in code, as well as the aggregator service.
+ * @returns false if creation failed, UIEdit if success.
+ */
 export const createAggregator = async (
 	req: Pattern.AggregatorRequest
 ): Promise<false | UIEdit[]> => {

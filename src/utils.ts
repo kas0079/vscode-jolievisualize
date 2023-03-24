@@ -1,8 +1,14 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { SimpleRange } from "./global";
-import { getVisFile } from "./extension";
+import { getVisFileURI } from "./extension";
 
+/**
+ * @param document Document to search in
+ * @param range text range to base the search from
+ * @param suffix token to include in the range
+ * @returns vscode range ranging over the initial range and the token in the text.
+ */
 export const getRangeWithSuffixToken = (
 	document: vscode.TextDocument,
 	range: SimpleRange,
@@ -19,6 +25,12 @@ export const getRangeWithSuffixToken = (
 	return new vscode.Range(codeRange.start, endPos);
 };
 
+/**
+ * @param document Document to search in
+ * @param range text range to base the search from
+ * @param prefix token to include in the range
+ * @returns vscode range ranging over the initial range and the token in the text.
+ */
 export const getRangeWithPrefixToken = (
 	document: vscode.TextDocument,
 	range: SimpleRange,
@@ -34,6 +46,12 @@ export const getRangeWithPrefixToken = (
 	return new vscode.Range(startPos, codeRange.end);
 };
 
+/**
+ * Converts the text range given from the svelte UI into a useable vscode Range object.
+ * @param documentText Text of the document the range is based out of
+ * @param range text range from the svelte UI
+ * @returns vscode.Range object ranging over the same code as the input range.
+ */
 export const convertToVsCodeRange = (
 	documentText: string,
 	range: SimpleRange
@@ -59,12 +77,16 @@ export const convertToVsCodeRange = (
 	);
 };
 
+/**
+ * @param filename filename of the document to open
+ * @returns vscode TextDocument object if the file can be opened. Else undefined
+ */
 export const openDocument = async (
 	filename: string
 ): Promise<vscode.TextDocument | undefined> => {
 	if (vscode.workspace.workspaceFolders === undefined) return undefined;
 
-	const fsPath = getVisFile();
+	const fsPath = getVisFileURI();
 	if (!fsPath) return undefined;
 
 	const filePath = path.join(
@@ -79,6 +101,13 @@ export const openDocument = async (
 	return document;
 };
 
+/**
+ * Finds the position of a token in a document
+ * @param document document to search in
+ * @param token token to search for
+ * @param prefix optional prefix of the searched string
+ * @returns vscode Position of the token in the text. Undefined if token was not found.
+ */
 export const findInDocument = (
 	document: vscode.TextDocument,
 	token: string,
@@ -102,6 +131,12 @@ export const findInDocument = (
 	);
 };
 
+/**
+ * Check if a port range is an explicit port definition or made from an 'embed ... as ...'
+ * @param document document containing the port
+ * @param range text range of the port
+ * @returns true if port is created implicitly by an embed
+ */
 export const isPortRangeAnEmbedding = (
 	document: vscode.TextDocument,
 	range: SimpleRange

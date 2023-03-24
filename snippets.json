@@ -7,11 +7,11 @@
 	"Jolie Visualize Top Level Service": {
 		"prefix": ["jvservice"],
 		"body": "{\"file\":\"${1:svc}.ol\", \"target\":\"${2:name}\", \"instances\":${3:1}},$0",
-		"description": "Skeleton top level service fo the Jolie Visualization tool"
+		"description": "Skeleton top level service for the Jolie Visualization tool"
 	},
 	"Jolie Visualize Docker Service": {
 		"prefix": ["jvdocker"],
 		"body": "{\"name\":\"${1:svc}\", \"image\":\"${2:image}\", \"instances\":${3:1}, \"ports\":[\"${4:3000}:${5:3000}\"]},$0",
-		"description": "Skeleton top level Docker service fo the Jolie Visualization tool"
+		"description": "Skeleton top level Docker service for the Jolie Visualization tool"
 	}
 }

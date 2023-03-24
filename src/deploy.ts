@@ -2,6 +2,11 @@ import * as fs from "fs";
 import * as path from "path";
 import { Deployment } from "./global";
 
+/**
+ * Formats the build folder name so the Java tool gets consistent input.
+ * @param folder build folder name
+ * @returns formatted build folder name
+ */
 export const formatBuildFolder = (folder: string): string => {
 	let res = "";
 	if (!folder.startsWith("/")) res = "/" + folder;
@@ -9,7 +14,15 @@ export const formatBuildFolder = (folder: string): string => {
 	return res;
 };
 
-export const makeDeploymentFolders = (p: {
+/**
+ * Checks which build method should be used. Then generates the correct .yaml file content and
+ * creates the folders, copies dependencies and makes Dockerfiles.
+ * @param data data from the java tool
+ * @param visFile object which contains a path to a file. This should be the visualization json file
+ * @param buildFolder The foldername of the build
+ * @param deployMethod "docker-compose" or "kubernetes"
+ */
+export const build = (p: {
 	data: string;
 	visFile: string;
 	buildFolder: string;
@@ -88,6 +101,12 @@ export const makeDeploymentFolders = (p: {
 	});
 };
 
+/**
+ * Calls the method from index which runs the Java tool and generates the information about the build.
+ * @param visFile object which contains a path to a file. This should be the visualization json file.
+ * @param buildRoot build dir folder name.
+ * @returns BuildInfo which contains information about the folders in the build dir, and the yaml content
+ */
 const dockerComposeBuild = (
 	dockercomposeData: string,
 	buildRoot: string
@@ -101,6 +120,12 @@ const dockerComposeBuild = (
 	return build;
 };
 
+/**
+ * Makes the Dockerfile content
+ * @param folder information about the folder which the Dockerfile should generate an image of
+ * @param jpm is the project is using JPM
+ * @returns Dockerfile content as string
+ */
 const makeDockerfile = (folder: Deployment.Folder, jpm: boolean): string => {
 	return `FROM jolielang/jolie\n${
 		folder.expose
@@ -112,8 +137,3 @@ const makeDockerfile = (folder: Deployment.Folder, jpm: boolean): string => {
 		folder.args ? " " + folder.args : ""
 	} ${folder.main}`;
 };
-
-if (process.argv.length < 3) {
-	console.log("Need input arguments.");
-	process.exit(1);
-}

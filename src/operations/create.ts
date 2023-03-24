@@ -6,6 +6,10 @@ import {
 } from "../utils";
 import { Create, UIEdit } from "../global";
 
+/**
+ * Creates a service in a document, filling in basic properties of the service and ports
+ * @returns false if creation failed, UIEdit if success.
+ */
 export const createService = async (
 	req: Create.ServiceRequest
 ): Promise<false | UIEdit> => {
@@ -59,7 +63,10 @@ export const createService = async (
 	return { edit, document, offset: document.offsetAt(range.end) };
 };
 
-//done
+/**
+ * Creates an embed line in the code
+ * @returns false if creation failed, UIEdit if success.
+ */
 export const createEmbed = async (
 	req: Create.EmbedRequest
 ): Promise<false | UIEdit> => {
@@ -76,7 +83,10 @@ export const createEmbed = async (
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
-//done
+/**
+ * Creates a port in a file
+ * @returns false if creation failed, UIEdit if success.
+ */
 export const createPort = async (
 	req: Create.PortRequest
 ): Promise<false | UIEdit> => {
@@ -108,7 +118,13 @@ export const createPort = async (
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
-//done
+/**
+ * Helper function to insert string into a file at some position
+ * @param document document to insert into
+ * @param position position to insert
+ * @param code string of code to insert
+ * @returns vscode workspace edit
+ */
 const create = async (
 	document: vscode.TextDocument,
 	position: vscode.Position,

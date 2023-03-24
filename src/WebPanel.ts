@@ -2,11 +2,12 @@ import * as jv from "jolievisualize";
 import * as path from "path";
 import * as vscode from "vscode";
 import { addEdit, applyEditsAndSave } from "./edits";
-import { deactivate, getVisFile, setIntercept } from "./extension";
+import { deactivate, getVisFileURI, setIntercept } from "./extension";
 import { createEmbed, createPort } from "./operations/create";
 import { removeEmbed, removePort } from "./operations/remove";
 import { renamePort, renameService } from "./operations/rename";
 import { createAggregator } from "./patterns/aggregator";
+import { setVisfileContent } from "./visFile";
 
 export default class WebPanel {
 	static currentPanel: WebPanel | undefined;
@@ -43,6 +44,9 @@ export default class WebPanel {
 		);
 		this.#panel.webview.html = this.#getHTML();
 
+		/**
+		 * Listens for messages from the svelte UI
+		 */
 		this.#panel.webview.onDidReceiveMessage(async (msg: any) => {
 			if (msg.command === "get.data") WebPanel.initData();
 			if (msg.command === "reload") {
@@ -50,10 +54,10 @@ export default class WebPanel {
 				setIntercept(false);
 			} else if (msg.command === "set.data") {
 				setIntercept(true);
-				await WebPanel.setVisfileContent(msg.detail);
-				WebPanel.sendRange(await jv.getData(getVisFile(), false));
+				await setVisfileContent(msg.detail);
+				WebPanel.sendRange(await jv.getData(getVisFileURI(), false));
 			} else if (msg.command === "get.ranges")
-				WebPanel.sendRange(await jv.getData(getVisFile(), false));
+				WebPanel.sendRange(await jv.getData(getVisFileURI(), false));
 			else if (msg.command === "rename.port")
 				addEdit(await renamePort(msg.detail));
 			else if (msg.command === "remove.embed")
@@ -72,7 +76,7 @@ export default class WebPanel {
 				const edits = await createAggregator(msg.detail);
 				if (edits) edits.forEach((e) => addEdit(e));
 			} else if (msg.command === "open.file") {
-				const rootdir = path.dirname(getVisFile()?.fsPath ?? "");
+				const rootdir = path.dirname(getVisFileURI()?.fsPath ?? "");
 				const doc = await vscode.workspace.openTextDocument(
 					path.join(rootdir, msg.detail.file)
 				);
@@ -93,6 +97,9 @@ export default class WebPanel {
 		);
 	}
 
+	/**
+	 * Sends visualization data to the UI and tells it to redraw everything
+	 */
 	static initData(): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
@@ -101,6 +108,9 @@ export default class WebPanel {
 		});
 	}
 
+	/**
+	 * Sends visualization data to the UI
+	 */
 	static sendData(): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
@@ -109,6 +119,10 @@ export default class WebPanel {
 		});
 	}
 
+	/**
+	 * Sends visualization data to the UI and updates all ranges.
+	 * @param data visualize data containing new range information
+	 */
 	static sendRange(data: any): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
@@ -117,6 +131,10 @@ export default class WebPanel {
 		});
 	}
 
+	/**
+	 * ! Not implemented
+	 * Sends an undo request to the UI telling it to go to a previous state
+	 */
 	static undo(): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#panel.webview.postMessage({
@@ -124,55 +142,28 @@ export default class WebPanel {
 		});
 	}
 
-	static async setVisfileContent(visfileContent: string): Promise<void> {
-		const jsonContent = JSON.parse(visfileContent);
-		const contentString = JSON.stringify(jsonContent.content);
-		if (
-			vscode.workspace.workspaceFolders === undefined ||
-			WebPanel.visFileContent === contentString
-		) {
-			setIntercept(false);
-			return;
-		}
-
-		WebPanel.visFileContent = contentString;
-
-		const document = await vscode.workspace.openTextDocument(this.visFile);
-		const numOfLines = document.lineCount - 1;
-		const lastCharPor = document.lineAt(numOfLines).text.length;
-
-		const edit = new vscode.WorkspaceEdit();
-		edit.replace(
-			this.visFile,
-			new vscode.Range(
-				new vscode.Position(0, 0),
-				new vscode.Position(numOfLines, lastCharPor)
-			),
-			contentString
-		);
-
-		await vscode.workspace.applyEdit(edit);
-		const success = await document.save();
-		setIntercept(false);
-
-		if (!success) {
-			vscode.window.showErrorMessage(
-				`Could not overwrite visualization file: ${document.fileName}`
-			);
-		}
-	}
-
+	/**
+	 * Open the webpanel in a vscode viewcolumn.
+	 * @param extensionPath path to the extension in the filesystem
+	 */
 	static open(extensionPath: string): void {
 		const column = vscode.ViewColumn.Beside;
 		if (WebPanel.currentPanel) WebPanel.currentPanel.#panel.reveal(column);
 		else WebPanel.currentPanel = new WebPanel(extensionPath, column);
 	}
 
+	/**
+	 * Closes the webpanel and disposes of disposables
+	 */
 	static close(): void {
 		if (!WebPanel.currentPanel) return;
 		WebPanel.currentPanel.#dispose();
 	}
 
+	/**
+	 * Adds the svelte JS and CSS paths into an HTML string.
+	 * @returns HTML content to render in the webview
+	 */
 	#getHTML(): string {
 		const scriptPathOnDisk = vscode.Uri.file(
 			path.join(
@@ -217,6 +208,9 @@ export default class WebPanel {
 			</html>`;
 	}
 
+	/**
+	 * Disposes all disposables and deactivates the extension.
+	 */
 	#dispose(): void {
 		WebPanel.currentPanel = undefined;
 		this.#panel.dispose();
@@ -229,6 +223,10 @@ export default class WebPanel {
 	}
 }
 
+/**
+ * Generate a random nonce text
+ * @returns Nonce string
+ */
 function getNonce(): string {
 	let text = "";
 	const possible =

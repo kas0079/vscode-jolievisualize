@@ -8,9 +8,11 @@ import {
 	getAllTopServiceFiles,
 	getVisFileContent,
 	hasTargetNameChanged,
+	setVisfileContent,
 } from "./visFile";
-import { formatBuildFolder, makeDeploymentFolders } from "./deploy";
+import { formatBuildFolder, build } from "./deploy";
 
+// set to true if extension should rely on vscode-jolie to function
 const USE_LSP = false;
 
 let interceptSave = false;
@@ -18,15 +20,28 @@ let visFile: vscode.Uri | undefined = undefined;
 const disposeables: vscode.Disposable[] = [];
 const fileVersions: { fileName: string; version: number }[] = [];
 
+/**
+ * @param bool true if onSaveListener should not run on a document save
+ */
 export const setIntercept = (bool: boolean): void => {
 	interceptSave = bool;
 };
 
-export const getVisFile = (): vscode.Uri | undefined => {
+/**
+ * @returns visualization file URI
+ */
+export const getVisFileURI = (): vscode.Uri | undefined => {
 	return visFile;
 };
 
+/**
+ * Main method of the extension. Registers all commands and collects them as disposables.
+ * @param context Extension context
+ */
 export function activate(context: vscode.ExtensionContext): void {
+	/**
+	 * Open webview command
+	 */
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			"jolievisualize.open",
@@ -92,6 +107,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 				let tls: TLS;
 
+				// runs before onSaveListener
 				let onWillSaveListener =
 					vscode.workspace.onWillSaveTextDocument(async (e) => {
 						if (!e.document.fileName.endsWith(".ol") || !visFile)
@@ -173,9 +189,7 @@ export function activate(context: vscode.ExtensionContext): void {
 							tlsInFile.instances = tls.instances;
 							tlsInFile.params = tls.params;
 							const newContent = { content: vfContent };
-							await WebPanel.setVisfileContent(
-								JSON.stringify(newContent)
-							);
+							await setVisfileContent(JSON.stringify(newContent));
 						}
 						const newData = jv.getData(visFile, false);
 						if (newData === WebPanel.data) return;
@@ -189,6 +203,10 @@ export function activate(context: vscode.ExtensionContext): void {
 		)
 	);
 
+	/**
+	 * Choose file command:
+	 * Opens a file selector for the user to select a visualize JSON file
+	 */
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
 			"jolievisualize.choosefile",
@@ -209,6 +227,10 @@ export function activate(context: vscode.ExtensionContext): void {
 		)
 	);
 
+	/**
+	 * Initialize Visualization File command:
+	 * Creates a visualize.jolie.json file with a skeleton structure.
+	 */
 	context.subscriptions.push(
 		vscode.commands.registerCommand("jolievisualize.init", async () => {
 			const confFile = vscode.workspace
@@ -243,6 +265,9 @@ export function activate(context: vscode.ExtensionContext): void {
 		})
 	);
 
+	/**
+	 * Build Project command:
+	 */
 	context.subscriptions.push(
 		vscode.commands.registerCommand("jolievisualize.build", async () => {
 			if (visFile === undefined) {
@@ -288,7 +313,7 @@ export function activate(context: vscode.ExtensionContext): void {
 				formatBuildFolder(buildFolder)
 			);
 
-			makeDeploymentFolders({
+			build({
 				data: buildData,
 				visFile: visFile.fsPath,
 				buildFolder: buildFolder ?? "/build",
@@ -298,6 +323,9 @@ export function activate(context: vscode.ExtensionContext): void {
 	);
 }
 
+/**
+ * Disposes of all disposables and reset the extension
+ */
 export function deactivate(): void {
 	interceptSave = false;
 	visFile = undefined;

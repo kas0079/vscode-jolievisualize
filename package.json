@@ -1,7 +1,7 @@
 {
 	"name": "vscode-jolievisualize",
 	"description": "Visualization tool for visualizing and refactoring Jolie architecture",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"engines": {
 		"vscode": "^1.72.0"
 	},
@@ -88,6 +88,6 @@
 		"typescript": "^4.9.3"
 	},
 	"dependencies": {
-		"jolievisualize": "file:../jolievisualize-0.0.1.tgz"
+		"jolievisualize": "file:../jolievisualize-1.0.0.tgz"
 	}
 }

@@ -6,7 +6,10 @@ import {
 	openDocument,
 } from "../utils";
 
-//Done
+/**
+ * Removes an embed line of code from a file.
+ * @returns false if removal failed, UIEdit if success.
+ */
 export const removeEmbed = async (
 	req: Remove.EmbedRequest
 ): Promise<false | UIEdit> => {
@@ -20,7 +23,10 @@ export const removeEmbed = async (
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
-//done
+/**
+ * Removes a port definition from a file.
+ * @returns false if creation failed, UIEdit if success.
+ */
 export const removePort = async (
 	req: Remove.PortRequest
 ): Promise<false | UIEdit> => {
@@ -38,7 +44,12 @@ export const removePort = async (
 	return { edit, document, offset: document.offsetAt(range.start) };
 };
 
-//done
+/**
+ * Helper function to remove code given a range in a document.
+ * @param document document to remove the code from
+ * @param range range of the code to remove
+ * @returns vscode workspace edit
+ */
 const remove = async (
 	document: vscode.TextDocument,
 	range: vscode.Range
