@@ -29,5 +29,9 @@ export const applyEditsAndSave = async (): Promise<void> => {
 
 	while (edits.length > 0) edits.pop();
 
-	WebPanel.sendRange(await jv.getData(getVisFileURI(), false));
+	const data = await jv.getData(getVisFileURI(), false);
+	if (JSON.parse(data).error) {
+		WebPanel.data = data;
+		WebPanel.initData();
+	} else WebPanel.sendRange(await jv.getData(getVisFileURI(), false));
 };

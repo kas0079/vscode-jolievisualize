@@ -121,6 +121,7 @@ Here is a table of possible fields for a service:
 ## Known Issues
 
 -   Renaming ports and service does not work
+-   User must manually import interfaces and services before refactoring in the UI
 
 ## Release Notes
 
