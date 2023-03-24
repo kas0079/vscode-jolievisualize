@@ -1,11 +1,12 @@
 {
 	"name": "vscode-jolievisualize",
-	"description": "Visualization tool for visualizing and refactoring Jolie architecture",
+	"description": "Visualization tool for visualizing, refactoring and building Jolie projects",
 	"version": "1.0.0",
 	"engines": {
 		"vscode": "^1.72.0"
 	},
 	"publisher": "emilovcina",
+	"license": "GPL",
 	"categories": [
 		"Visualization",
 		"Programming Languages",
