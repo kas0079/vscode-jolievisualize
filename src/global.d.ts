@@ -55,12 +55,13 @@ declare namespace Create {
 		embeddings?: {
 			name: string;
 			port: string;
+			file?: string;
 		}[];
 		inputPorts?: {
 			name: string;
 			location: string;
 			protocol: string;
-			interfaces?: string;
+			interfaces?: { name: string; file?: string }[];
 			aggregates?: { name: string }[];
 			annotation?: string;
 		}[];
@@ -68,7 +69,7 @@ declare namespace Create {
 			name: string;
 			location: string;
 			protocol: string;
-			interfaces?: string;
+			interfaces?: { name: string; file?: string }[];
 		}[];
 	};
 
@@ -77,6 +78,7 @@ declare namespace Create {
 		embedName: string;
 		embedPort: string;
 		range: SimpleRange;
+		embedFile?: string;
 		isFirst?: boolean;
 	};
 
@@ -89,7 +91,7 @@ declare namespace Create {
 			name: string;
 			location: string;
 			protocol: string;
-			interfaces: string;
+			interfaces: { name: string; file?: string }[];
 			annotation?: string;
 		};
 	};
@@ -112,15 +114,15 @@ declare namespace Pattern {
 				name: string;
 				location: string;
 				protocol: string;
-				interfaces?: { name: string }[];
+				interfaces?: { name: string; file?: string }[];
 			}[];
 		};
-		embeddings?: { name: string; port: string }[];
+		embeddings?: { name: string; port: string; file?: string }[];
 		newIps: {
 			isFirst: boolean;
 			range: SimpleRange;
 			file: string;
-			interfaces: string;
+			interfaces: { name: string; file?: string }[];
 			location: string;
 			name: string;
 			protocol: string;

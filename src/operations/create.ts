@@ -1,10 +1,14 @@
 import * as vscode from "vscode";
+import { Create, UIEdit } from "../global";
 import {
 	convertToVsCodeRange,
+	findInDocument,
+	formatToJoliePath,
 	getRangeWithSuffixToken,
+	isTokenAnImport,
 	openDocument,
+	removeCommonPathPrefix,
 } from "../utils";
-import { Create, UIEdit } from "../global";
 
 /**
  * Creates a service in a document, filling in basic properties of the service and ports
@@ -25,7 +29,7 @@ export const createService = async (
 			ops += `outputPort ${op.name} {
 		Protocol: ${op.protocol}
 		Location: "${op.location}"
-		${op.interfaces ? `Interfaces: ${op.interfaces}` : ``}
+		${op.interfaces ? `Interfaces: ${op.interfaces.map((t) => t.name)}` : ``}
 	}\n\n\t`;
 		});
 
@@ -36,7 +40,7 @@ export const createService = async (
 			}\tinputPort ${ip.name} {
 		Protocol: ${ip.protocol}
 		Location: "${ip.location}"
-		${ip.interfaces ? `Interfaces: ${ip.interfaces}` : ``}
+		${ip.interfaces ? `Interfaces: ${ip.interfaces.map((t) => t.name)}` : ``}
 		${
 			ip.aggregates && ip.aggregates.length > 0
 				? `Aggregates: ${ip.aggregates.map((t) => t.name)}`
@@ -101,9 +105,9 @@ export const createPort = async (
 		Location: "${req.port.location}"
 		Protocol: ${req.port.protocol}
 		${
-			req.port.interfaces === ""
+			req.port.interfaces.length === 0
 				? "OneWay: dummy(void)"
-				: "Interfaces: " + req.port.interfaces
+				: "Interfaces: " + req.port.interfaces.map((t) => t.name)
 		}
 	}${req.isFirst ? "" : "\n\n\t"}`;
 
@@ -116,6 +120,52 @@ export const createPort = async (
 		: await create(document, range.end.translate(0, 1), code);
 
 	return { edit, document, offset: document.offsetAt(range.start) };
+};
+
+/**
+ * Checks if the import is missing of some create operation and parses the file paths into jolie import notation
+ * @param fileName name of main file
+ * @param path path of the imported declaration file
+ * @param importName name of the import
+ * @returns false if creation failed, UIEdit if success.
+ */
+export const createImportIfMissing = async (
+	fileName: string,
+	path: string,
+	importName: string
+): Promise<UIEdit | false> => {
+	if (fileName === path) return false;
+	const document = await openDocument(fileName);
+	if (!document || path === "") return false;
+	const otherDocument = await openDocument(path);
+	if (!otherDocument) return false;
+
+	//make into jolie path
+	const joliePath = formatToJoliePath(
+		removeCommonPathPrefix(otherDocument.uri.fsPath, document.uri.fsPath)
+	);
+
+	const edit = {
+		edit: await create(
+			document,
+			new vscode.Position(0, 0),
+			`from ${joliePath} import ${importName}\n`
+		),
+		document,
+		offset: document.offsetAt(new vscode.Position(0, 0)),
+	};
+
+	//search for the file import
+	const importPos = findInDocument(document, joliePath);
+	if (!importPos) return edit;
+	return isTokenAnImport(document, importName, joliePath, importPos, [
+		"from",
+		"interface",
+		"service",
+		"type",
+	])
+		? false
+		: edit;
 };
 
 /**

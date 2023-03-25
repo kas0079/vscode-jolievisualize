@@ -1,5 +1,9 @@
 import { Pattern, SimpleRange, UIEdit } from "../global";
-import { createPort, createService } from "../operations/create";
+import {
+	createImportIfMissing,
+	createPort,
+	createService,
+} from "../operations/create";
 import { openDocument } from "../utils";
 
 /**
@@ -24,6 +28,14 @@ export const createAggregator = async (
 		});
 		if (!p) continue;
 		edits.push(p);
+		for (const interf of ip.interfaces) {
+			const imp = await createImportIfMissing(
+				ip.file,
+				interf.file ?? "",
+				interf.name
+			);
+			if (imp) edits.push(imp);
+		}
 	}
 
 	const document = await openDocument(req.service.file);
@@ -37,12 +49,30 @@ export const createAggregator = async (
 
 	const ops = req.service.outputPorts.map((t) => {
 		return {
-			interfaces: t.interfaces?.flatMap((t) => t.name).toString(),
+			interfaces: t.interfaces?.filter((t) => t !== undefined),
 			name: t.name,
 			location: t.location.startsWith("!local") ? "local" : t.location,
 			protocol: t.protocol,
 		};
 	});
+	for (const op of ops)
+		for (const interf of op.interfaces ?? []) {
+			const imp = await createImportIfMissing(
+				req.service.file,
+				interf.file ?? "",
+				interf.name
+			);
+			if (imp) edits.push(imp);
+		}
+
+	for (const emb of req.embeddings ?? []) {
+		const imp = await createImportIfMissing(
+			req.service.file,
+			emb.file ?? "",
+			emb.name
+		);
+		if (imp) edits.push(imp);
+	}
 
 	const svc = await createService({
 		file: req.service.file,

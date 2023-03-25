@@ -1,7 +1,81 @@
-import * as vscode from "vscode";
 import * as path from "path";
-import { SimpleRange } from "./global";
+import * as vscode from "vscode";
 import { getVisFileURI } from "./extension";
+import { SimpleRange } from "./global";
+
+/**
+ * @param importedFile file path to find the relative path to
+ * @param mainFile file path to find the relative path from
+ * @returns relative path from mainFile to importedFile
+ */
+export const removeCommonPathPrefix = (
+	importedFile: string,
+	mainFile: string
+): string => {
+	return path.relative(path.dirname(mainFile), importedFile);
+};
+
+/**
+ * Converts a path string into the path notation used when importing in Jolie
+ * @param path Path as string
+ * @returns Jolie path
+ */
+export const formatToJoliePath = (path: string) => {
+	const tmp = path
+		.replaceAll("../", ".")
+		.replaceAll("/", ".")
+		.replace(".ol", "");
+	return "." + tmp;
+};
+
+/**
+ * Checks if a token from a file already is imported either as token or star.
+ * @param document Document to check for imports
+ * @param importName Token to check
+ * @param joliePath file path to where the token is declared in jolie import path notation
+ * @param importPos position of the import file statement
+ * @param keywords keywords to check to make sure that the token actually couldn't be some name of other things in the file
+ * @returns true if import already exists in file
+ */
+export const isTokenAnImport = (
+	document: vscode.TextDocument,
+	importName: string,
+	joliePath: string,
+	importPos: vscode.Position,
+	keywords: string[]
+): boolean => {
+	const starPos = findInDocumentFromPosition(
+		document,
+		"*",
+		importPos.translate(0, joliePath.length)
+	);
+	const tokenPos = findInDocumentFromPosition(
+		document,
+		importName,
+		importPos.translate(0, joliePath.length)
+	);
+	if (!tokenPos && !starPos) return false;
+
+	const tokenOrStar = [starPos, tokenPos]
+		.map((t) => (t === undefined ? -1 : document.offsetAt(t)))
+		.filter((t) => t >= 0)
+		.sort((a, b) => a - b)[0];
+
+	const closestKeyword = keywords
+		.map((t) => {
+			const pos = findInDocumentFromPosition(
+				document,
+				t,
+				importPos.translate(0, joliePath.length)
+			);
+			if (!pos) return -1;
+			return document.offsetAt(pos);
+		})
+		.filter((t) => t >= 0)
+		.sort((a, b) => a - b)[0];
+
+	return tokenOrStar < closestKeyword;
+};
 
 /**
  * @param document Document to search in
@@ -118,17 +192,24 @@ export const findInDocument = (
 	const searchString = `${prefix === "" ? prefix : prefix + " "}${token}`;
 	const positionOftext = documentText.indexOf(searchString);
 	if (positionOftext < 0) return undefined;
-	const tempString = documentText.substring(0, positionOftext);
-	const lineNumber = tempString.split("\n").length - 1;
+	return document.positionAt(positionOftext);
+};
 
-	return new vscode.Position(
-		lineNumber,
-		document
-			.lineAt(lineNumber)
-			.text.indexOf(
-				searchString.split(" ")[searchString.split(" ").length - 1]
-			)
+export const findInDocumentFromPosition = (
+	document: vscode.TextDocument,
+	token: string,
+	startPos: vscode.Position
+): vscode.Position | undefined => {
+	const documentText = document.getText(
+		new vscode.Range(
+			startPos,
+			document.positionAt(document.getText().length)
+		)
 	);
+	const searchString = `${token}`;
+	const positionOftext = documentText.indexOf(searchString);
+	if (positionOftext < 0) return undefined;
+	return document.positionAt(positionOftext + document.offsetAt(startPos));
 };
 
 /**

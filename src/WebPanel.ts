@@ -3,7 +3,11 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { addEdit, applyEditsAndSave } from "./edits";
 import { deactivate, getVisFileURI, setIntercept } from "./extension";
-import { createEmbed, createPort } from "./operations/create";
+import {
+	createEmbed,
+	createImportIfMissing,
+	createPort,
+} from "./operations/create";
 import { removeEmbed, removePort } from "./operations/remove";
 import { renamePort, renameService } from "./operations/rename";
 import { createAggregator } from "./patterns/aggregator";
@@ -62,17 +66,35 @@ export default class WebPanel {
 				addEdit(await renamePort(msg.detail));
 			else if (msg.command === "remove.embed")
 				addEdit(await removeEmbed(msg.detail));
-			else if (msg.command === "create.embed")
+			else if (msg.command === "create.embed") {
 				addEdit(await createEmbed(msg.detail));
-			else if (msg.command === "remove.ports") {
+				addEdit(
+					await createImportIfMissing(
+						msg.detail.filename,
+						msg.detail.embedFile,
+						msg.detail.embedName
+					)
+				);
+			} else if (msg.command === "remove.ports") {
 				msg.detail.ports.forEach(async (req: any) => {
 					addEdit(await removePort(req));
 				});
 			} else if (msg.command === "rename.service")
 				addEdit(await renameService(msg.detail));
-			else if (msg.command === "create.port")
+			else if (msg.command === "create.port") {
 				addEdit(await createPort(msg.detail));
-			else if (msg.command === "create.pattern.aggregator") {
+				msg.detail.port.interfaces.forEach(
+					async (inf: { name: string; file: string }) => {
+						addEdit(
+							await createImportIfMissing(
+								msg.detail.file,
+								inf.file,
+								inf.name
+							)
+						);
+					}
+				);
+			} else if (msg.command === "create.pattern.aggregator") {
 				const edits = await createAggregator(msg.detail);
 				if (edits) edits.forEach((e) => addEdit(e));
 			} else if (msg.command === "open.file") {
