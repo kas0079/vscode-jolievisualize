@@ -3,6 +3,7 @@ import { Create, UIEdit } from "../global";
 import {
 	convertToVsCodeRange,
 	findInDocument,
+	findTokenInProject,
 	formatToJoliePath,
 	getRangeWithSuffixToken,
 	isTokenAnImport,
@@ -123,7 +124,8 @@ export const createPort = async (
 };
 
 /**
- * Checks if the import is missing of some create operation and parses the file paths into jolie import notation
+ * Checks if the import is missing of some create operations and parses the file paths into jolie import notation.
+ * If the file is not found, look through the whole project for the symbol
  * @param fileName name of main file
  * @param path path of the imported declaration file
  * @param importName name of the import
@@ -132,8 +134,15 @@ export const createPort = async (
 export const createImportIfMissing = async (
 	fileName: string,
 	path: string,
-	importName: string
+	importName: string,
+	keyword?: string
 ): Promise<UIEdit | false> => {
+	if (!path && keyword) {
+		//look for where the import should come from
+		const tmp = await findTokenInProject(importName, keyword);
+		if (!tmp) return false;
+		path = tmp;
+	}
 	if (fileName === path) return false;
 	const document = await openDocument(fileName);
 	if (!document || path === "") return false;

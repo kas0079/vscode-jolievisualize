@@ -72,28 +72,27 @@ export default class WebPanel {
 					await createImportIfMissing(
 						msg.detail.filename,
 						msg.detail.embedFile,
-						msg.detail.embedName
+						msg.detail.embedName,
+						"service"
 					)
 				);
-			} else if (msg.command === "remove.ports") {
-				msg.detail.ports.forEach(async (req: any) => {
+			} else if (msg.command === "remove.ports")
+				for (const req of msg.detail.ports)
 					addEdit(await removePort(req));
-				});
-			} else if (msg.command === "rename.service")
+			else if (msg.command === "rename.service")
 				addEdit(await renameService(msg.detail));
 			else if (msg.command === "create.port") {
 				addEdit(await createPort(msg.detail));
-				msg.detail.port.interfaces.forEach(
-					async (inf: { name: string; file: string }) => {
-						addEdit(
-							await createImportIfMissing(
-								msg.detail.file,
-								inf.file,
-								inf.name
-							)
-						);
-					}
-				);
+				for (const inf of msg.detail.port.interfaces) {
+					addEdit(
+						await createImportIfMissing(
+							msg.detail.file,
+							inf.file,
+							inf.name,
+							"interface"
+						)
+					);
+				}
 			} else if (msg.command === "create.pattern.aggregator") {
 				const edits = await createAggregator(msg.detail);
 				if (edits) edits.forEach((e) => addEdit(e));

@@ -1,7 +1,53 @@
 import * as path from "path";
 import * as vscode from "vscode";
+import * as fs from "fs";
 import { getVisFileURI } from "./extension";
 import { SimpleRange } from "./global";
+
+/**
+ * Looks through all OL files and finds a token of a certain type. This can be
+ * interfaces, types, services and so on.
+ * @param token Token to look for
+ * @param type Which type to look for (interface, service, type etc...)
+ * @returns file path if the token was found, undefined if not found.
+ */
+export const findTokenInProject = async (
+	token: string,
+	type: string
+): Promise<string | undefined> => {
+	const rootFolder = vscode.workspace.workspaceFolders?.at(0);
+	if (!rootFolder) return undefined;
+	const allOlFiles = getAllOlFilesInDir(rootFolder.uri.fsPath);
+
+	for (const file of allOlFiles) {
+		const document = await openDocument(file);
+		if (!document) continue;
+		const allOccurences = findAllOccurrencesInDocument(document, type);
+		const names = allOccurences
+			.map((index) => {
+				let word = document.getWordRangeAtPosition(
+					document.positionAt(index + type.length + 1)
+				);
+				let i = 1;
+				while (!word) {
+					i += 2;
+					word = document.getWordRangeAtPosition(
+						document.positionAt(index + type.length + i)
+					);
+				}
+				const name = document.getText(word).trim();
+				return name.includes(" ") ||
+					name.includes("	") ||
+					name.includes("\n") ||
+					name.length !== token.length
+					? ""
+					: name;
+			})
+			.filter((t) => t !== "");
+		if (names.includes(token)) return file;
+	}
+	return undefined;
+};
 
 /**
  * @param importedFile file path to find the relative path to
@@ -226,4 +272,48 @@ export const isPortRangeAnEmbedding = (
 		convertToVsCodeRange(document.getText(), range)
 	);
 	return !rangeText.includes("{");
+};
+
+/**
+ * @param document Document to look in
+ * @param token Token to look for
+ * @returns List of number of indeces
+ */
+const findAllOccurrencesInDocument = (
+	document: vscode.TextDocument,
+	token: string
+): number[] => {
+	const result: number[] = [];
+	let i: number = document.getText().indexOf(token);
+	while (i !== -1) {
+		result.push(i);
+		i = document.getText().indexOf(token, i + 1);
+	}
+	return result;
+};
+
+/**
+ * Find all OL files, recursively, from the project root folder.
+ * @param rootDirPath Root path of the project
+ * @param result Previous recursive step's result. Should always be empty array when first calling the function.
+ * @returns List of paths to OL files
+ */
+const getAllOlFilesInDir = (
+	rootDirPath: string,
+	result: string[] = []
+): string[] => {
+	const visFile = getVisFileURI();
+	if (!visFile) return result;
+	fs.readdirSync(rootDirPath).forEach((c) => {
+		if (fs.statSync(path.join(rootDirPath, c)).isDirectory())
+			getAllOlFilesInDir(path.join(rootDirPath, c), result);
+		else if (fs.existsSync(path.join(rootDirPath, c)) && c.endsWith(".ol"))
+			result.push(
+				path.relative(
+					path.dirname(visFile.fsPath),
+					path.join(rootDirPath, c)
+				)
+			);
+	});
+	return result;
 };

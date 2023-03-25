@@ -32,7 +32,8 @@ export const createAggregator = async (
 			const imp = await createImportIfMissing(
 				ip.file,
 				interf.file ?? "",
-				interf.name
+				interf.name,
+				"interface"
 			);
 			if (imp) edits.push(imp);
 		}
@@ -60,7 +61,8 @@ export const createAggregator = async (
 			const imp = await createImportIfMissing(
 				req.service.file,
 				interf.file ?? "",
-				interf.name
+				interf.name,
+				"interface"
 			);
 			if (imp) edits.push(imp);
 		}
@@ -69,7 +71,8 @@ export const createAggregator = async (
 		const imp = await createImportIfMissing(
 			req.service.file,
 			emb.file ?? "",
-			emb.name
+			emb.name,
+			"service"
 		);
 		if (imp) edits.push(imp);
 	}
