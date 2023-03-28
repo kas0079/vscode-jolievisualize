@@ -1,22 +1,22 @@
 # Jolie Visualization for Visual Studio Code
 
-Visualize, refactor and build [Jolie](https://www.jolie-lang.org) projects directly in vscode.
+Visualize and refactor [Jolie](https://www.jolie-lang.org) projects directly in vscode.
 
 ## Requirements
 
 -   It is required that Jolie, version 1.11.0-git, is set up correctly. Look [here](https://www.jolie-lang.org/downloads.html) for further explanation on how to set up Jolie correctly.
 
-*   A JSON configuration file is used for getting information about the top-level services and networks. See the section on how to set up the visualization file.
+*   A JSON configuration file is used for getting information about the top-level services and networks. See the section on how to set up the architecture file.
 
 ## Features
 
-### Setting up the visualization config file
+### Setting up the architecture config file
 
-Run the command `Jolie: Initialize Visualization File` and a standard skeleton JSON file will be created. Change the `file` field to the Jolie file which contains the service you want to visualize. Change the `target` field to the name of the service, or remove it if only one service exists in the file. Add more services if needed, and see the section about the structure of the visualization file for more features.
+Run the command `Jolie: Initialize Architecture File` and a standard skeleton JSON file will be created. Change the `file` field to the Jolie file which contains the service you want to visualize. Change the `target` field to the name of the service, or remove it if only one service exists in the file. Add more services if needed, and see the section about the structure of the architecture file for more features.
 
 ### Visualize
 
-When a valid visualization file has been created, run the command: `Jolie: Visualize` to bring up the UI:
+When a valid architecture file has been created, run the command: `Jolie: Visualize` to bring up the UI:
 ![Jolievisualize vscode example](https://i.imgur.com/KlO4bKw.png)
 
 ### Refactor
@@ -34,28 +34,28 @@ Possible refactors at the moment include:
 
 ### Build
 
-Build the project using the command: `Jolie: Build Project` and a folder will be created containing each service, and its dependencies, with a corresponding Dockerfile. A docker-compose.yml file will also be created.
+Build the project using the command: `Jolie: Docker-Compose` and a folder will be created containing each service, and its dependencies, with a corresponding Dockerfile. A docker-compose.yml file will also be created.
 
 ## Extension Settings
 
 -   `jolievisualize.buildFolder`: Relative path to where the project should build to. The default is `./build`.
 -   `jolievisualize.buildMethod`: Deployment method to use for the build. Only `docker-compose` is supported at the moment.
--   `jolievisualize.visualizationfile`: Standard visualization file to get the top-level service information from. The default is `./visualize.jolie.json`.
+-   `jolievisualize.architectureFile`: Standard visualization file to get the top-level service information from. The default is `./architecture.jolie.json`.
 
 ## All Commands
 
-| **Command**                          | **Description**                                                                                   |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Jolie: Visualize                     | Opens the UI                                                                                      |
-| Jolie: Build Project                 | Creates the build folder, in the root of the project, and sets up a deployment yaml file          |
-| Jolie: Initialize Visualization File | Creates a skeleton visualisation JSON file in the root of the project                             |
-| Jolie: Choose Visualization File     | Opens a file selector which allows the user to choose another JSON file as the visualization file |
+| **Command**                         | **Description**                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Jolie: Visualize                    | Opens the UI                                                                                     |
+| Jolie: Docker-Compose               | Creates the build folder, in the root of the project, and sets up a deployment yaml file         |
+| Jolie: Initialize Architecture File | Creates a skeleton architecture JSON file in the root of the project                             |
+| Jolie: Choose Architecture File     | Opens a file selector which allows the user to choose another JSON file as the architecture file |
 
 ## Snippets
 
 ### jv
 
-Skeleton visualization file.
+Skeleton architecture file.
 
 ```JSON
 [
@@ -81,7 +81,7 @@ Skeleton top-level Docker service.
 {"name":"svc", "image":"image", "instances": 1, "ports":["3000:3000"]}
 ```
 
-## Visualize JSON File Structure
+## Architecture JSON File Structure
 
 The file contains an array of arrays of services. Each array in the enveloping array represents a network.
 
@@ -106,7 +106,7 @@ Here is a table of possible fields for a service:
 
 | **Field** | **Description**                                                                     | **Type**       | **Example**                                       |
 | --------- | ----------------------------------------------------------------------------------- | -------------- | ------------------------------------------------- |
-| file      | The location of a Jolie file relative to the visualization file                     | String         | `main.ol`                                         |
+| file      | The location of a Jolie file relative to the architecture file                      | String         | `main.ol`                                         |
 | target    | Name of the service in the file                                                     | String         | `MainService`                                     |
 | name      | Name of the service in the file                                                     | String         | `MainService`                                     |
 | instances | Number of instances of the service to be visualized                                 | Long           | `2`                                               |
@@ -120,8 +120,7 @@ Here is a table of possible fields for a service:
 
 ## Known Issues
 
--   Renaming ports and service does not work
--   User must manually import interfaces and services before refactoring in the UI
+-   Renaming ports and service does not work without a working Jolie LSP
 
 ## Release Notes
 

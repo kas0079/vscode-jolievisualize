@@ -28,7 +28,7 @@ export const setIntercept = (bool: boolean): void => {
 };
 
 /**
- * @returns visualization file URI
+ * @returns architecture file URI
  */
 export const getVisFileURI = (): vscode.Uri | undefined => {
 	return visFile;
@@ -65,7 +65,7 @@ export function activate(context: vscode.ExtensionContext): void {
 				if (defaultVf) {
 					const confFile = vscode.workspace
 						.getConfiguration("jolievisualize")
-						.get("visualizationfile") as string;
+						.get("architectureFile") as string;
 
 					if (!vscode.workspace.workspaceFolders) {
 						deactivate();
@@ -79,7 +79,7 @@ export function activate(context: vscode.ExtensionContext): void {
 						visFile = visFilepath;
 				}
 
-				// Select visualize file and getJSON
+				// Select architecture file and getJSON
 				if (visFile === undefined) {
 					await vscode.commands.executeCommand(
 						"jolievisualize.choosefile"
@@ -205,7 +205,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 	/**
 	 * Choose file command:
-	 * Opens a file selector for the user to select a visualize JSON file
+	 * Opens a file selector for the user to select a architecture JSON file
 	 */
 	context.subscriptions.push(
 		vscode.commands.registerCommand(
@@ -228,14 +228,14 @@ export function activate(context: vscode.ExtensionContext): void {
 	);
 
 	/**
-	 * Initialize Visualization File command:
-	 * Creates a visualize.jolie.json file with a skeleton structure.
+	 * Initialize architecture File command:
+	 * Creates a architecture.jolie.json file with a skeleton structure.
 	 */
 	context.subscriptions.push(
 		vscode.commands.registerCommand("jolievisualize.init", async () => {
 			const confFile = vscode.workspace
 				.getConfiguration("jolievisualize")
-				.get("visualizationfile") as string;
+				.get("architectureFile") as string;
 
 			if (
 				!vscode.workspace.workspaceFolders ||
@@ -247,7 +247,7 @@ export function activate(context: vscode.ExtensionContext): void {
 				)
 			) {
 				await vscode.window.showErrorMessage(
-					"Couldn't create Jolie visualization file"
+					"Couldn't create Jolie architecture file"
 				);
 				deactivate();
 				return;
@@ -273,7 +273,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			if (visFile === undefined) {
 				const confFile = vscode.workspace
 					.getConfiguration("jolievisualize")
-					.get("visualizationfile") as string;
+					.get("architectureFile") as string;
 
 				if (!vscode.workspace.workspaceFolders) {
 					deactivate();
@@ -295,7 +295,7 @@ export function activate(context: vscode.ExtensionContext): void {
 			}
 			if (visFile === undefined) {
 				await vscode.window.showErrorMessage(
-					"No visualization file was chosen."
+					"No architecture file was chosen."
 				);
 				return;
 			}

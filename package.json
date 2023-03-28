@@ -1,6 +1,6 @@
 {
 	"name": "vscode-jolievisualize",
-	"description": "Visualization tool for visualizing, refactoring and building Jolie projects",
+	"description": "Visualization tool for visualizing and refactoring Jolie projects",
 	"version": "1.0.0",
 	"engines": {
 		"vscode": "^1.72.0"
@@ -26,17 +26,17 @@
 			},
 			{
 				"command": "jolievisualize.build",
-				"title": "Build Project",
+				"title": "Docker-Compose",
 				"category": "Jolie"
 			},
 			{
 				"command": "jolievisualize.choosefile",
-				"title": "Choose Visualization File",
+				"title": "Choose Architecture File",
 				"category": "Jolie"
 			},
 			{
 				"command": "jolievisualize.init",
-				"title": "Initialize Visualization File",
+				"title": "Initialize Architecture File",
 				"category": "Jolie"
 			}
 		],
@@ -59,10 +59,10 @@
 					"default": "docker-compose",
 					"description": "The deployment method to build to."
 				},
-				"jolievisualize.visualizationfile": {
+				"jolievisualize.architectureFile": {
 					"type": "string",
-					"default": "/visualize.jolie.json",
-					"description": "The standard visualization file to look for. If it cannot be found, the user selects another one."
+					"default": "/architecture.jolie.json",
+					"description": "The standard architecture file to look for. If it cannot be found, the user selects another one."
 				}
 			}
 		}

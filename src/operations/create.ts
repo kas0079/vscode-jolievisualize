@@ -52,7 +52,7 @@ export const createService = async (
 
 	if (req.embeddings)
 		req.embeddings.forEach(
-			(emb) => (embs += `embed ${emb.name} in ${emb.port}\n\t`)
+			(emb) => (embs += `embed ${emb.name} as ${emb.port}\n\t`)
 		);
 
 	const code = `\n\nservice ${req.name} {
@@ -78,7 +78,11 @@ export const createEmbed = async (
 	const document = await openDocument(req.filename);
 	if (!document) return false;
 
-	const code = `\n\n\tembed ${req.embedName} in ${req.embedPort}`;
+	const embedAs = req.embedAs === undefined ? true : req.embedAs;
+
+	const code = `\n\n\tembed ${req.embedName}${
+		embedAs ? " as " + req.embedPort : ""
+	}`;
 
 	const range = req.isFirst
 		? getRangeWithSuffixToken(document, req.range, "{")
@@ -141,8 +145,15 @@ export const createImportIfMissing = async (
 		//look for where the import should come from
 		const tmp = await findTokenInProject(importName, keyword);
 		if (!tmp) return false;
-		path = tmp;
+		path =
+			tmp.startsWith("/") && !fileName.startsWith("/")
+				? tmp.substring(1)
+				: !tmp.startsWith("/") && fileName.startsWith("/")
+				? "/" + tmp
+				: tmp;
 	}
+	console.log(path, fileName);
+
 	if (fileName === path) return false;
 	const document = await openDocument(fileName);
 	if (!document || path === "") return false;

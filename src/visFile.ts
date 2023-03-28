@@ -5,8 +5,8 @@ import WebPanel from "./WebPanel";
 import { setIntercept } from "./extension";
 
 /**
- * @param file visualization file URI
- * @returns the content of the visualization file as an object
+ * @param file architecture file URI
+ * @returns the content of the architecture file as an object
  */
 export const getVisFileContent = async (file: vscode.Uri): Promise<TLS[][]> => {
 	const document = await vscode.workspace.openTextDocument(file);
@@ -14,8 +14,8 @@ export const getVisFileContent = async (file: vscode.Uri): Promise<TLS[][]> => {
 };
 
 /**
- * Replaces the content of the visualization string with new content from the svelte UI
- * @param visfileContent new visualization file content
+ * Replaces the content of the architecture string with new content from the svelte UI
+ * @param visfileContent new architecture file content
  */
 export const setVisfileContent = async (
 	visfileContent: string
@@ -58,9 +58,9 @@ export const setVisfileContent = async (
 };
 
 /**
- * Checks if an edit in the code has changed the name of a service in the visualization file
+ * Checks if an edit in the code has changed the name of a service in the architecture file
  * @param tls Top Level Service
- * @returns true if edit has changed a service in the visualization file
+ * @returns true if edit has changed a service in the architecture file
  */
 export const hasTargetNameChanged = async (tls: TLS): Promise<boolean> => {
 	if (!tls.file) return false;
@@ -72,7 +72,7 @@ export const hasTargetNameChanged = async (tls: TLS): Promise<boolean> => {
 
 /**
  * Gets the valid files of all top level services
- * @param visFile URI to the visualization file
+ * @param visFile URI to the architecture file
  * @returns list of paths as string
  */
 export const getAllTopServiceFiles = async (

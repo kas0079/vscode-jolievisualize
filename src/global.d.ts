@@ -77,6 +77,7 @@ declare namespace Create {
 		filename: string;
 		embedName: string;
 		embedPort: string;
+		embedAs?: boolean;
 		range: SimpleRange;
 		embedFile?: string;
 		isFirst?: boolean;
