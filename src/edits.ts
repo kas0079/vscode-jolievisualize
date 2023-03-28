@@ -11,7 +11,7 @@ const edits: UIEdit[] = [];
  * @param edit Edit to add
  */
 export const addEdit = (edit: UIEdit | false): void => {
-	if (!edit) return;
+	if (!edit || isEditAlreadyOnStack(edit)) return;
 	edits.push(edit);
 };
 
@@ -34,4 +34,32 @@ export const applyEditsAndSave = async (): Promise<void> => {
 		WebPanel.data = data;
 		WebPanel.initData();
 	} else WebPanel.sendRange(await jv.getData(getVisFileURI(), false));
+};
+
+/**
+ * @param edit edit to check if it already exists on stack
+ * @returns true if edit exists
+ */
+const isEditAlreadyOnStack = (edit: UIEdit): boolean => {
+	let res = false;
+	for (const e of edits) {
+		if (
+			e.document.uri.fsPath !== edit.document.uri.fsPath ||
+			!e.document.uri.fsPath.endsWith(".ol") ||
+			!edit.document.uri.fsPath.endsWith(".ol")
+		)
+			continue;
+		const textEdits = e.edit.get(edit.document.uri);
+		const textEdits2 = edit.edit.get(edit.document.uri);
+		if (textEdits.length !== textEdits2.length) continue;
+		for (let i = 0; i < textEdits.length; i++) {
+			const te1 = textEdits[i];
+			const te2 = textEdits2[i];
+			if (te1.newText === te2.newText && te1.range.isEqual(te2.range)) {
+				res = true;
+				break;
+			}
+		}
+	}
+	return res;
 };
