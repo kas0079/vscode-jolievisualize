@@ -208,6 +208,17 @@ export default class WebPanel {
 		);
 		const styleUri = this.#panel.webview.asWebviewUri(stylePathOnDisk);
 
+		const faviconPathOnDisk = vscode.Uri.file(
+			path.join(
+				this.#extensionPath,
+				"node_modules",
+				"jolievisualize",
+				"web",
+				"favicon.ico"
+			)
+		);
+		this.#panel.iconPath = faviconPathOnDisk;
+
 		const nonce = getNonce();
 		return `<!DOCTYPE html>
 		<html lang="en">
