@@ -32,7 +32,7 @@ Possible refactors at the moment include:
 -   Creating input and output ports
 -   Select some services and add an Aggregator service in front of them.
 
-### Build
+### Local Deployment
 
 Build the project using the command: `Jolie: Docker-Compose` and a folder will be created containing each service, and its dependencies, with a corresponding Dockerfile. A docker-compose.yml file will also be created.
 
@@ -40,7 +40,7 @@ Build the project using the command: `Jolie: Docker-Compose` and a folder will b
 
 -   `jolievisualize.buildFolder`: Relative path to where the project should build to. The default is `./build`.
 -   `jolievisualize.buildMethod`: Deployment method to use for the build. Only `docker-compose` is supported at the moment.
--   `jolievisualize.architectureFile`: Standard visualization file to get the top-level service information from. The default is `./architecture.jolie.json`.
+-   `jolievisualize.architectureFile`: Standard architecture file to get the top-level service information from. The default is `./architecture.jolie.json`.
 
 ## All Commands
 
@@ -114,7 +114,7 @@ Here is a table of possible fields for a service:
 | args      | Jolie arguments which gets added to the Dockerfile after building                   | String         | `--connlimit 10 --stackTraces`                    |
 | params    | Either path to a JSON file containing service parameters, or the parameters as JSON | String or JSON | `params.json` or `{ location: "localhost:3432" }` |
 | env       | Deployment environment variables. Gets added in the deployment yaml file            | JSON           | `{ username: "test", password: "123" }`           |
-| images    | Specifies a remote image which gets added in the deployment yaml file               | String         | `emilovcina/SomeJolieImage`                       |
+| images    | Specifies a remote image which gets added in the deployment yaml file               | String         | `emilovcina/somejolieimage`                       |
 | ports     | List of strings defining Docker port mappings                                       | String[]       | `["4000:4000","3444:9000"]`                       |
 | volumes   | List of file locations which will get bound as volumes when running the deployment  | String[]       | `["/config.ini","assets/test.txt"]`               |
 
