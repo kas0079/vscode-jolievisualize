@@ -114,7 +114,7 @@ Here is a table of possible fields for a service:
 | args      | Jolie arguments which gets added to the Dockerfile after building                   | String         | `--connlimit 10 --stackTraces`                    |
 | params    | Either path to a JSON file containing service parameters, or the parameters as JSON | String or JSON | `params.json` or `{ location: "localhost:3432" }` |
 | env       | Deployment environment variables. Gets added in the deployment yaml file            | JSON           | `{ username: "test", password: "123" }`           |
-| images    | Specifies a remote image which gets added in the deployment yaml file               | String         | `emilovcina/somejolieimage`                       |
+| image     | Specifies a remote image which gets added in the deployment yaml file               | String         | `emilovcina/somejolieimage`                       |
 | ports     | List of strings defining Docker port mappings                                       | String[]       | `["4000:4000","3444:9000"]`                       |
 | volumes   | List of file locations which will get bound as volumes when running the deployment  | String[]       | `["/config.ini","assets/test.txt"]`               |
 

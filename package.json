@@ -76,7 +76,7 @@
 		"rs": "rm package-lock.json && rm -rf node_modules/ && npm i"
 	},
 	"devDependencies": {
-		"@types/glob": "^8.0.0",
+		"@types/glob": "^8.1.0",
 		"@types/mocha": "^10.0.1",
 		"@types/node": "16.x",
 		"@types/vscode": "^1.74.0",
