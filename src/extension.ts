@@ -162,12 +162,14 @@ export function activate(context: vscode.ExtensionContext): void {
 						const tmp = fileVersions.find(
 							(t) => t.fileName === e.fileName
 						);
-						if (tmp === undefined)
+						if (tmp === undefined) {
+							if (fileVersions.length >= 6)
+								fileVersions.splice(0, 5);
 							fileVersions.push({
 								fileName: e.fileName,
 								version: e.version,
 							});
-						else {
+						} else {
 							if (e.version <= tmp.version) return;
 							tmp.version = e.version;
 						}
