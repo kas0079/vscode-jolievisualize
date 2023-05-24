@@ -152,7 +152,6 @@ export const createImportIfMissing = async (
 				? "/" + tmp
 				: tmp;
 	}
-	console.log(path, fileName);
 
 	if (fileName === path) return false;
 	const document = await openDocument(fileName);
