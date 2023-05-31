@@ -56,10 +56,9 @@ export default class WebPanel {
 			if (msg.command === "reload") {
 				WebPanel.initData();
 				setIntercept(false);
-			} else if (msg.command === "set.data") {
+			} else if (msg.command === "set.visfile") {
 				setIntercept(true);
 				await setVisfileContent(msg.detail);
-				WebPanel.sendRange(await jv.getData(getVisFileURI(), false));
 			} else if (msg.command === "get.ranges")
 				WebPanel.sendRange(await jv.getData(getVisFileURI(), false));
 			else if (msg.command === "rename.port")
