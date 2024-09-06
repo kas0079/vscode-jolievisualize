@@ -15,6 +15,8 @@ import { formatBuildFolder, build } from "./deploy";
 // set to true if extension should rely on vscode-jolie to function
 const USE_LSP = false;
 
+let outputChannel = vscode.window.createOutputChannel("jolievisualize-extension-TS");
+outputChannel.show();
 let interceptSave = false;
 let visFile: vscode.Uri | undefined = undefined;
 const disposeables: vscode.Disposable[] = [];
@@ -46,6 +48,8 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.commands.registerCommand(
 			"jolievisualize.open",
 			async (defaultVf = true) => {
+				outputChannel.appendLine("start of jolievisualize.open")
+				console.log("start of jolievisualize.open");
 				if (USE_LSP) {
 					const vscodeJolie =
 						vscode.extensions.getExtension("jolie.vscode-jolie");
@@ -96,7 +100,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
 				// setData of webview
 				interceptSave = false;
-				WebPanel.data = jv.getData(visFile, false);
+				let getDataResult = jv.getData(visFile, false);
+				outputChannel.appendLine(getDataResult);
+				WebPanel.data = getDataResult;
 				WebPanel.visFile = visFile;
 				WebPanel.visFileContent = JSON.stringify(
 					await getVisFileContent(visFile)
